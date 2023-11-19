@@ -7,6 +7,9 @@
 # my txt files
 *.txt
 *.TXT
+reminder.txt
+README.TXT
+package.bluej
 
 # BlueJ files
 *.ctxt
