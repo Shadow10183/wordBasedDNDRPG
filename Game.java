@@ -273,6 +273,7 @@ public class Game {
                 System.out.println(
                         String.format("You picked up the %s and put it in your inventory.", entry.getKey().getName()));
                 itemLocations.remove(entry.getKey());
+                return;
             }
 
         }
