@@ -1,0 +1,15 @@
+implement map done
+    set 2 map, one map with names, update gate here done
+    2nd map will blur name based on list(hashmap instead?)of map facts done
+implement weapon done
+implement attack "enemy" done
+implement enemy done
+test weapon and enemy done
+create high level weapons and enemies
+implement spells, books and cast command (cast "spell" "enemy")
+implement healpotion and place them around map or enemies (random drop from defeated enemies?50% chance? roll d20?)
+
+item weight, immovable items (lectern/anvil)
+
+add comments to item, game, d20, room(name), parser/commandwords (combat section), enemy, player
+
