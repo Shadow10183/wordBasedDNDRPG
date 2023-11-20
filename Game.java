@@ -26,8 +26,13 @@ public class Game {
     private ArrayList<Room> path = new ArrayList<>();
     private HashMap<Item, Room> itemLocations = new HashMap<>();
     private ArrayList<Room> randomRooms = new ArrayList<>();
+    private HashMap<Enemy, Room> enemyList = new HashMap<>();
     private Room teleporter;
     private Gamemap map;
+    private boolean inCombat = false;
+    private boolean detected = false;
+    private Player player;
+    private Enemy currentEnemy;
 
     public static void main(String[] args) {
         Game mygame = new Game();
@@ -46,6 +51,9 @@ public class Game {
      * Create all the rooms and link their exits together.
      */
     private void createEntities() {
+        // initialize the player
+        player = new Player();
+
         // create the rooms
         Room spawn, eastPier, westPier, blackHall, courtyard, pantry, diningHall, library, armoury, throneRoom;
         randomRooms.add(spawn = new Room("Spawn", "at the spawn point"));
@@ -62,14 +70,20 @@ public class Game {
                 "You go through a strange doorway and a bright flash dazzles your vision.");
 
         // create the items
-        Item blackHallKey, throneRoomKey;
+        Item blackHallKey, throneRoomKey, stick, butterKnife, rustySword, honedSword;
         map = new Gamemap("map", "Gives you a bird's eye view.");
         blackHallKey = new Key("blackHallKey", "Unlocks the way to Black Hall.", blackHall, "north");
         throneRoomKey = new Key("throneRoomKey", "Unlocks the way to the Throne Room.", throneRoom, "north");
+        stick = new Weapon("stick", "Cool pointy stick you found.", 2);
+
+        // create the enemies
+        Enemy imp, goblin, troll, ogre, bigbad;
+        enemyList.put(imp = new Enemy("Imp", 1), blackHall);
 
         // place the items
         itemLocations.put(blackHallKey, westPier);
         itemLocations.put(throneRoomKey, armoury);
+        itemLocations.put(stick, eastPier);
         inventory.add(map);
 
         // initialise room exits
@@ -152,34 +166,63 @@ public class Game {
         }
 
         String commandWord = command.getCommandWord().toLowerCase();
-        switch (commandWord) {
-            case "help":
-                printHelp();
-                break;
-            case "go":
-                goRoom(command);
-                break;
-            case "back":
-                goBack(command);
-                break;
-            case "search":
-                search(command);
-                break;
-            case "pickup":
-                pickup(command);
-                break;
-            case "inventory":
-                getInventory(command);
-                break;
-            case "use":
-                useItem(command);
-                break;
-            case "drop":
-                drop(command);
-                break;
-            case "quit":
-                wantToQuit = quit(command);
-                break;
+        if (inCombat) {
+            switch (commandWord) {
+                case "help":
+                    printCombatHelp();
+                    return wantToQuit;
+                case "inventory":
+                    getInventory(command);
+                    return wantToQuit;
+                case "use":
+                    useItem(command);
+                    return wantToQuit;
+                case "attack":
+                    attack(command);
+                    return wantToQuit;
+                case "quit":
+                    wantToQuit = quit(command);
+                    return wantToQuit;
+                default:
+                    System.out.println("You can't do that while in a fight.");
+                    return wantToQuit;
+            }
+        } else {
+            switch (commandWord) {
+                case "help":
+                    printHelp();
+                    return wantToQuit;
+                case "go":
+                    goRoom(command);
+                    return wantToQuit;
+                case "back":
+                    goBack(command);
+                    return wantToQuit;
+                case "search":
+                    search(command);
+                    return wantToQuit;
+                case "pickup":
+                    pickup(command);
+                    return wantToQuit;
+                case "inventory":
+                    getInventory(command);
+                    return wantToQuit;
+                case "use":
+                    useItem(command);
+                    return wantToQuit;
+                case "drop":
+                    drop(command);
+                    return wantToQuit;
+                case "equip":
+                    equipWeapon(command);
+                    return wantToQuit;
+                case "attack":
+                    attack(command);
+                    return wantToQuit;
+                case "quit":
+                    wantToQuit = quit(command);
+                    return wantToQuit;
+            }
         }
         // else command not recognised.
         return wantToQuit;
@@ -200,11 +243,25 @@ public class Game {
         parser.showCommands();
     }
 
+    private void printCombatHelp() {
+        System.out.println("You are in the middle of a battle.");
+        System.out.println("Stand strong adventurer, and prevail.");
+        System.out.println();
+        System.out.println("Your command words are:");
+        parser.showCombatCommands();
+    }
+
     /**
      * Try to in to one direction. If there is an exit, enter the new
      * room, otherwise print an error message.
      */
     private void goRoom(Command command) {
+        if (detected) {
+            System.out.println(
+                    "You cannot proceed until all enemies have been defeated.\nIf you are not ready, go back.");
+            return;
+        }
+
         if (!command.hasSecondWord()) {
             // if there is no second word, we don't know where to go...
             System.out.println("Go where?");
@@ -225,12 +282,22 @@ public class Game {
             currentRoom = randomRooms.get((int) (Math.random() * randomRooms.size()));
             map.updatePointer(currentRoom.getName());
             path.add(currentRoom);
-            System.out.println(currentRoom.getLongDescription());
+            if (hasEnemy()) {
+                System.out.println(currentRoom.getMiddleDescription());
+                showEnemy();
+            } else {
+                System.out.println(currentRoom.getLongDescription());
+            }
         } else {
             currentRoom = nextRoom;
             map.updatePointer(currentRoom.getName());
             path.add(currentRoom);
-            System.out.println(currentRoom.getLongDescription());
+            if (hasEnemy()) {
+                System.out.println(currentRoom.getMiddleDescription());
+                showEnemy();
+            } else {
+                System.out.println(currentRoom.getLongDescription());
+            }
         }
     }
 
@@ -240,7 +307,12 @@ public class Game {
             map.updatePointer(currentRoom.getName());
             path.remove(path.size() - 1);
             System.out.println("You have retraced your path.");
-            System.out.println(currentRoom.getLongDescription());
+            if (hasEnemy()) {
+                System.out.println(currentRoom.getMiddleDescription());
+                showEnemy();
+            } else {
+                System.out.println(currentRoom.getLongDescription());
+            }
         } else {
             System.out.println("There is no path to retrace, go explore.");
         }
@@ -332,6 +404,9 @@ public class Game {
                             System.out.println("You can't use this here.");
                             return;
                         }
+                    default:
+                        System.out.println("You can't use this here.");
+                        return;
                 }
             }
         }
@@ -355,6 +430,68 @@ public class Game {
         }
     }
 
+    private void equipWeapon(Command command) {
+        if (!command.hasSecondWord()) {
+            System.out.println("Equip what?");
+            return;
+        }
+        String itemname = command.getSecondWord();
+        for (Item item : inventory) {
+            if (item.getName().equals(itemname)) {
+                if (item.getItemtype() != "weapon") {
+                    System.out.println("You can't equip that as a weapon.");
+                    return;
+                }
+                player.equipWeapon((Weapon) item);
+                System.out.println(itemname + " has been equipped.");
+            }
+        }
+    }
+
+    private void attack(Command command) {
+        if (!command.hasSecondWord()) {
+            System.out.println("Attack what?");
+            return;
+        }
+        String enemyName = command.getSecondWord();
+        for (Entry<Enemy, Room> entry : enemyList.entrySet()) {
+            if (entry.getKey().getName().equalsIgnoreCase(enemyName)) {
+                currentEnemy = entry.getKey();
+            }
+        }
+        if (!inCombat) {
+            System.out.println(String.format("You enter in a fight with %s.", currentEnemy.getName()));
+            inCombat = true;
+            return;
+        } else {
+            player.getWeapon().attack(currentEnemy);
+            if (currentEnemy.getHealth() <= 0) {
+                System.out.println(String.format("%s has been defeated.", currentEnemy.getName()));
+                inCombat = false;
+                player.levelUp(currentEnemy.getLevel() + 1);
+                enemyList.remove(currentEnemy);
+                hasEnemy();
+                showEnemy();
+            } else {
+                try {
+                    Thread.sleep(200);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+                enemyAttack(currentEnemy);
+                System.out.println(String.format("Your HP: %d/%d \t%s HP: %d", player.getHealth(),
+                        player.getMaxHealth(), currentEnemy.getName(), currentEnemy.getHealth()));
+            }
+        }
+
+    }
+
+    private void enemyAttack(Enemy currentEnemy) {
+        player.takeDamage(currentEnemy.getDamage());
+        System.out
+                .println(String.format("%s does %d damage to you.", currentEnemy.getName(), currentEnemy.getDamage()));
+    }
+
     /**
      * "Quit" was entered. Check the rest of the command to see
      * whether we really quit the game.
@@ -367,6 +504,25 @@ public class Game {
             return false;
         } else {
             return true; // signal that we want to quit
+        }
+    }
+
+    private boolean hasEnemy() {
+        detected = false;
+        for (Entry<Enemy, Room> entry : enemyList.entrySet()) {
+            if (entry.getValue() == currentRoom) {
+                detected = true;
+            }
+        }
+        return detected;
+    }
+
+    private void showEnemy() {
+        for (Entry<Enemy, Room> entry : enemyList.entrySet()) {
+            if (entry.getValue() == currentRoom) {
+                detected = true;
+                System.out.println(String.format("A(n) %s sizes you up.", entry.getKey().getName()));
+            }
         }
     }
 }

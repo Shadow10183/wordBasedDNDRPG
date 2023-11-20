@@ -84,6 +84,10 @@ public class Room {
         return "You are " + description + ".\n" + getExitString();
     }
 
+    public String getMiddleDescription() {
+        return "You are " + description + ".";
+    }
+
     /**
      * Return whether or not this room is locked
      * 

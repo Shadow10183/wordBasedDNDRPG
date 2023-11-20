@@ -72,4 +72,8 @@ public class Parser {
     public void showCommands() {
         commands.showAll();
     }
+
+    public void showCombatCommands() {
+        commands.showCombat();
+    }
 }
