@@ -26,9 +26,8 @@ public class Game {
     private ArrayList<Room> path = new ArrayList<>();
     private HashMap<Item, Room> itemLocations = new HashMap<>();
     private ArrayList<Room> randomRooms = new ArrayList<>();
-    private Room teleporter = new Room("Teleporter",
-            "You go through a strange doorway and a bright flash dazzles your vision.");
-    private Gamemap map = new Gamemap();
+    private Room teleporter;
+    private Gamemap map;
 
     public static void main(String[] args) {
         Game mygame = new Game();
@@ -59,15 +58,19 @@ public class Game {
         randomRooms.add(library = new Room("Library", "in the library"));
         randomRooms.add(armoury = new Room("Armoury", "in the armoury"));
         throneRoom = new Room("Throne Room", "in the Throne Room. You feel a sinister presence", true);
+        teleporter = new Room("Teleporter",
+                "You go through a strange doorway and a bright flash dazzles your vision.");
 
         // create the items
         Item blackHallKey, throneRoomKey;
+        map = new Gamemap("map", "Gives you a bird's eye view.");
         blackHallKey = new Key("blackHallKey", "Unlocks the way to Black Hall.", blackHall, "north");
         throneRoomKey = new Key("throneRoomKey", "Unlocks the way to the Throne Room.", throneRoom, "north");
 
         // place the items
         itemLocations.put(blackHallKey, westPier);
         itemLocations.put(throneRoomKey, armoury);
+        inventory.add(map);
 
         // initialise room exits
         spawn.setExit("east", eastPier);
@@ -317,9 +320,10 @@ public class Game {
             if (item.getName().equals(itemname)) {
                 switch (item.getItemtype()) {
                     case "key":
-                        if (currentRoom.getExit(item.getDirection()) == item.getUnlock()) {
-                            item.getUnlock().unlock();
-                            map.unlock(item.getUnlock().getName());
+                        Key key = (Key) item;
+                        if (currentRoom.getExit(key.getDirection()) == key.getUnlock()) {
+                            key.getUnlock().unlock();
+                            map.unlock((key).getUnlock().getName());
                             inventory.remove(item);
                             System.out.println("A room has been unlocked.");
                             System.out.println(currentRoom.getLongDescription());
