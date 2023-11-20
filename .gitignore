@@ -5,9 +5,6 @@
 *.log
 
 # my txt files
-*.txt
-*.TXT
-reminder.txt
 README.TXT
 package.bluej
 
