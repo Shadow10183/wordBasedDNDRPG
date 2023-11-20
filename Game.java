@@ -28,7 +28,7 @@ public class Game {
     private ArrayList<Room> randomRooms = new ArrayList<>();
     private Room teleporter = new Room("Teleporter",
             "You go through a strange doorway and a bright flash dazzles your vision.");
-    private Map map = new Map();
+    private Gamemap map = new Gamemap();
 
     public static void main(String[] args) {
         Game mygame = new Game();
@@ -50,21 +50,20 @@ public class Game {
         // create the rooms
         Room spawn, eastPier, westPier, blackHall, courtyard, pantry, diningHall, library, armoury, throneRoom;
         randomRooms.add(spawn = new Room("Spawn", "at the spawn point"));
-        randomRooms.add(eastPier = new Room("East Pier", "on the east pier"));
+        randomRooms.add(eastPier = new Room("East pier", "on the east pier"));
         randomRooms.add(westPier = new Room("West Pier", "on the west pier"));
         randomRooms.add(blackHall = new Room("Black Hall", "in the Black Hall", true));
         randomRooms.add(courtyard = new Room("Courtyard", "in the courtyard"));
         randomRooms.add(pantry = new Room("Pantry", "in the pantry"));
-        randomRooms.add(diningHall = new Room("Dining Hall", "in the dining hall"));
+        randomRooms.add(diningHall = new Room("Dining hall", "in the dining hall"));
         randomRooms.add(library = new Room("Library", "in the library"));
-        randomRooms.add(armoury = new Room("Throne Room", "in the armoury"));
-        throneRoom = new Room("East Pier", "in the Throne Room. You feel a sinister presence", true);
+        randomRooms.add(armoury = new Room("Armoury", "in the armoury"));
+        throneRoom = new Room("Throne Room", "in the Throne Room. You feel a sinister presence", true);
 
         // create the items
         Item blackHallKey, throneRoomKey;
         blackHallKey = new Key("blackHallKey", "Unlocks the way to Black Hall.", blackHall, "north");
         throneRoomKey = new Key("throneRoomKey", "Unlocks the way to the Throne Room.", throneRoom, "north");
-        System.out.println(blackHallKey.name);
 
         // place the items
         itemLocations.put(blackHallKey, westPier);
@@ -121,10 +120,6 @@ public class Game {
             finished = processCommand(command);
         }
         System.out.println("Thank you for playing.  Good bye.");
-    }
-
-    private void updateMap(String target, String replacement) {
-        map.update(target, replacement);
     }
 
     /**
@@ -220,25 +215,26 @@ public class Game {
 
         if (nextRoom == null) {
             System.out.println("There is no door!");
+        } else if (nextRoom.isLocked() == true) {
+            System.out.println("The door is locked. Maybe you should find a key.");
+        } else if (nextRoom == teleporter) {
+            System.out.println(teleporter.getShortDescription());
+            currentRoom = randomRooms.get((int) (Math.random() * randomRooms.size()));
+            map.updatePointer(currentRoom.getName());
+            path.add(currentRoom);
+            System.out.println(currentRoom.getLongDescription());
         } else {
-            if (nextRoom.isLocked() == true) {
-                System.out.println("The door is locked. Maybe you should find a key.");
-            } else if (nextRoom == teleporter) {
-                System.out.println(teleporter.getShortDescription());
-                currentRoom = randomRooms.get((int) (Math.random() * randomRooms.size()));
-                path.add(currentRoom);
-                System.out.println(currentRoom.getLongDescription());
-            } else {
-                currentRoom = nextRoom;
-                path.add(currentRoom);
-                System.out.println(currentRoom.getLongDescription());
-            }
+            currentRoom = nextRoom;
+            map.updatePointer(currentRoom.getName());
+            path.add(currentRoom);
+            System.out.println(currentRoom.getLongDescription());
         }
     }
 
     private void goBack(Command command) {
         if (path.size() > 1) {
             currentRoom = path.get(path.size() - 2);
+            map.updatePointer(currentRoom.getName());
             path.remove(path.size() - 1);
             System.out.println("You have retraced your path.");
             System.out.println(currentRoom.getLongDescription());
@@ -313,7 +309,7 @@ public class Game {
         }
         String itemname = command.getSecondWord();
         if (itemname.equals("map")) {
-            System.out.println("You pull out your map.\n" + map);
+            System.out.println("You pull out your map.\n" + map.getMap());
             return;
         }
         for (Item item : inventory) {
@@ -321,7 +317,8 @@ public class Game {
                 switch (item.getItemtype()) {
                     case "key":
                         if (currentRoom.getExit(item.getDirection()) == item.getUnlock()) {
-                            currentRoom.getExit(item.getDirection()).unlock();
+                            item.getUnlock().unlock();
+                            map.unlock(item.getUnlock().getName());
                             inventory.remove(item);
                             System.out.println("A room has been unlocked.");
                             System.out.println(currentRoom.getLongDescription());

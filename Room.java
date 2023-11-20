@@ -31,6 +31,7 @@ public class Room {
      * @param description The room's description.
      */
     public Room(String name, String description) {
+        this.name = name;
         this.description = description;
         exits = new HashMap<>();
     }
@@ -44,6 +45,7 @@ public class Room {
      * @param locked      Whether the room is locked.
      */
     public Room(String name, String description, boolean locked) {
+        this.name = name;
         this.description = description;
         this.locked = locked;
         exits = new HashMap<>();
