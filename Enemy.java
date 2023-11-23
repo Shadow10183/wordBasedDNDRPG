@@ -1,8 +1,12 @@
+import java.util.HashMap;
+
 public class Enemy {
     private String name;
     private int level;
     private int health;
     private int damage;
+    private boolean hasDrop = false;
+    private HashMap<Item, Double> drops = new HashMap<>();
 
     public Enemy(String name, int level) {
         this.name = name;
@@ -27,6 +31,14 @@ public class Enemy {
         }
     }
 
+    public void addDrop(Item item, double chance) {
+        drops.put(item, chance);
+    }
+
+    public HashMap<Item, Double> getDrops() {
+        return drops;
+    }
+
     public void takeDamage(int damage) {
         health -= damage;
     }
@@ -45,5 +57,9 @@ public class Enemy {
 
     public String getName() {
         return name;
+    }
+
+    public boolean hasDrop() {
+        return hasDrop;
     }
 }

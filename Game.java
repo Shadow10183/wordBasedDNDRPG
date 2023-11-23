@@ -33,10 +33,10 @@ public class Game {
     private boolean detected = false;
     private Player player;
     private Enemy currentEnemy;
+    private boolean died = false;
 
     public static void main(String[] args) {
         Game mygame = new Game();
-        mygame.play();
     }
 
     /**
@@ -45,6 +45,7 @@ public class Game {
     public Game() {
         createEntities();
         parser = new Parser();
+        play();
     }
 
     /**
@@ -70,21 +71,37 @@ public class Game {
                 "You go through a strange doorway and a bright flash dazzles your vision.");
 
         // create the items
-        Item blackHallKey, throneRoomKey, stick, butterKnife, rustySword, honedSword;
+        Item blackHallKey, throneRoomKey, stick, butterKnife, rustySword, honedSword, healthPotion1, healthPotion2;
         map = new Gamemap("map", "Gives you a bird's eye view.");
         blackHallKey = new Key("blackHallKey", "Unlocks the way to Black Hall.", blackHall, "north");
         throneRoomKey = new Key("throneRoomKey", "Unlocks the way to the Throne Room.", throneRoom, "north");
         stick = new Weapon("stick", "Cool pointy stick you found.", 2);
+        butterKnife = new Weapon("butterKnife", "A common utensil with an uncommonly sharp edge.", 4);
+        rustySword = new Weapon("rustySword", "This must've been discarded for quite some time.", 5);
+        honedSword = new Weapon("honedSword", "Given new life from a fresh sharpening, it thanks your benevolence.", 8);
+        healthPotion1 = new HealthPotion(2);
+        healthPotion2 = new HealthPotion(3);
 
         // create the enemies
         Enemy imp, goblin, troll, ogre, bigbad;
         enemyList.put(imp = new Enemy("Imp", 1), blackHall);
+        enemyList.put(goblin = new Enemy("Goblin", 2), courtyard);
+        enemyList.put(troll = new Enemy("Troll", 2), diningHall);
+        enemyList.put(ogre = new Enemy("Ogre", 3), library);
+        enemyList.put(bigbad = new Enemy("Titan", 4), throneRoom);
 
         // place the items
         itemLocations.put(blackHallKey, westPier);
         itemLocations.put(throneRoomKey, armoury);
         itemLocations.put(stick, eastPier);
+        itemLocations.put(butterKnife, pantry);
+        itemLocations.put(rustySword, armoury);
+        itemLocations.put(healthPotion1, eastPier);
+        itemLocations.put(healthPotion2, westPier);
         inventory.add(map);
+
+        // add enemy drops
+        imp.addDrop(new HealthPotion(2), 1);
 
         // initialise room exits
         spawn.setExit("east", eastPier);
@@ -166,7 +183,20 @@ public class Game {
         }
 
         String commandWord = command.getCommandWord().toLowerCase();
-        if (inCombat) {
+
+        if (died) {
+            switch (commandWord) {
+                case "quit":
+                    wantToQuit = quit(command);
+                    return wantToQuit;
+                case "retry":
+                    retry();
+                    return wantToQuit;
+                default:
+                    System.out.println("Dude you died.");
+                    return wantToQuit;
+            }
+        } else if (inCombat) {
             switch (commandWord) {
                 case "help":
                     printCombatHelp();
@@ -222,10 +252,11 @@ public class Game {
                 case "quit":
                     wantToQuit = quit(command);
                     return wantToQuit;
+                default:
+                    System.out.println("You can't do that during exploration.");
+                    return wantToQuit;
             }
         }
-        // else command not recognised.
-        return wantToQuit;
     }
 
     // implementations of user commands:
@@ -240,7 +271,7 @@ public class Game {
         System.out.println("around the Castle of Shmorgenyorg.");
         System.out.println();
         System.out.println("Your command words are:");
-        parser.showCommands();
+        parser.showExplorationCommands();
     }
 
     private void printCombatHelp() {
@@ -319,14 +350,26 @@ public class Game {
     }
 
     private void search(Command command) {
+        if (detected) {
+            System.out.println(
+                    "You cannot search until all enemies have been defeated.\nIf you are not ready, go back.");
+            return;
+        }
         if (command.hasSecondWord()) {
             System.out.println("Hey bozo just search.");
         } else {
             String searchresult = "";
             for (Entry<Item, Room> entry : itemLocations.entrySet()) {
                 if (entry.getValue() == currentRoom) {
-                    searchresult = (searchresult == "") ? entry.getKey().getName()
-                            : searchresult + " " + entry.getKey().getName();
+                    String itemName;
+                    if (entry.getKey().getItemtype() != "healthPotion") {
+                        itemName = entry.getKey().getName() + " ";
+                    } else {
+                        itemName = entry.getKey().getName()
+                                + String.format("x%d ", ((HealthPotion) entry.getKey()).getCount());
+                    }
+                    searchresult = (searchresult == "") ? itemName
+                            : searchresult + " " + itemName;
                 }
             }
             System.out.println("You search the room and find\n"
@@ -335,6 +378,11 @@ public class Game {
     }
 
     private void pickup(Command command) {
+        if (detected) {
+            System.out.println(
+                    "You cannot do that until all enemies have been defeated.\nIf you are not ready, go back.");
+            return;
+        }
         if (!command.hasSecondWord()) {
             System.out.println("What are you picking up bozo?");
             return;
@@ -344,13 +392,30 @@ public class Game {
         for (Entry<Item, Room> entry : itemLocations.entrySet()) {
             if (entry.getValue() == currentRoom && entry.getKey().getName().equals(itemname)) {
                 pickedup = true;
-                inventory.add(entry.getKey());
-                System.out.println(
-                        String.format("You picked up the %s and put it in your inventory.", entry.getKey().getName()));
+                String itemType = entry.getKey().getItemtype();
+                if (itemType != "healthPotion") {
+                    inventory.add(entry.getKey());
+                    System.out.println(
+                            String.format("You picked up the %s and put it in your inventory.",
+                                    entry.getKey().getName()));
+                } else {
+                    boolean itemfound = false;
+                    for (Item item : inventory) {
+                        if (item.getItemtype() == itemType) {
+                            itemfound = true;
+                            ((HealthPotion) item).add(((HealthPotion) entry.getKey()).getCount());
+                        }
+                    }
+                    if (!itemfound) {
+                        inventory.add(entry.getKey());
+                    }
+                    System.out.println(
+                            String.format("You picked up the %s(s) and put it in your inventory.",
+                                    entry.getKey().getName()));
+                }
                 itemLocations.remove(entry.getKey());
                 return;
             }
-
         }
         if (!pickedup) {
             System.out.println("What were you trying to pick up... a rock?");
@@ -364,7 +429,11 @@ public class Game {
             } else {
                 System.out.println("Your inventory contains:");
                 for (Item item : inventory) {
-                    System.out.print(item.getName() + " ");
+                    if (item.getItemtype() != "healthPotion") {
+                        System.out.print(item.getName() + " ");
+                    } else {
+                        System.out.print(item.getName() + String.format("x%d ", ((HealthPotion) item).getCount()));
+                    }
                 }
                 System.out.println();
                 return;
@@ -404,6 +473,9 @@ public class Game {
                             System.out.println("You can't use this here.");
                             return;
                         }
+                    case "healthPotion":
+                        ((HealthPotion) item).use(player);
+                        return;
                     default:
                         System.out.println("You can't use this here.");
                         return;
@@ -469,6 +541,40 @@ public class Game {
                 System.out.println(String.format("%s has been defeated.", currentEnemy.getName()));
                 inCombat = false;
                 player.levelUp(currentEnemy.getLevel() + 1);
+                if (!currentEnemy.hasDrop()) {
+                    String dropresult = "";
+                    for (Entry<Item, Double> entry : currentEnemy.getDrops().entrySet()) {
+                        if (Math.random() > entry.getValue()) {
+                            continue;
+                        }
+                        String itemType = entry.getKey().getItemtype();
+                        if (itemType != "healthPotion") {
+                            itemLocations.put(entry.getKey(), currentRoom);
+                            String itemName;
+                            itemName = entry.getKey().getName();
+                            dropresult = (dropresult == "") ? itemName
+                                    : dropresult + " " + itemName;
+                        } else {
+                            boolean itemfound = false;
+                            for (Entry<Item, Room> roomEntry : itemLocations.entrySet()) {
+                                if (roomEntry.getValue() == currentRoom
+                                        && roomEntry.getKey().getItemtype() == itemType) {
+                                    itemfound = true;
+                                    ((HealthPotion) roomEntry.getKey()).add(((HealthPotion) entry.getKey()).getCount());
+                                }
+                            }
+                            if (!itemfound) {
+                                itemLocations.put(entry.getKey(), currentRoom);
+                            }
+                            String itemName;
+                            itemName = entry.getKey().getName()
+                                    + String.format("x%d ", ((HealthPotion) entry.getKey()).getCount());
+                            dropresult = (dropresult == "") ? itemName
+                                    : dropresult + " " + itemName;
+                        }
+                    }
+                    System.out.println("It dropped\n" + dropresult);
+                }
                 enemyList.remove(currentEnemy);
                 hasEnemy();
                 showEnemy();
@@ -479,10 +585,11 @@ public class Game {
                     Thread.currentThread().interrupt();
                 }
                 enemyAttack(currentEnemy);
-                System.out.println(String.format("Your HP: %d/%d \t%s HP: %d", player.getHealth(),
-                        player.getMaxHealth(), currentEnemy.getName(), currentEnemy.getHealth()));
             }
         }
+    }
+
+    private void cast(Command command) {
 
     }
 
@@ -490,6 +597,12 @@ public class Game {
         player.takeDamage(currentEnemy.getDamage());
         System.out
                 .println(String.format("%s does %d damage to you.", currentEnemy.getName(), currentEnemy.getDamage()));
+        if (player.getHealth() <= 0) {
+            died();
+            return;
+        }
+        System.out.println(String.format("Your HP: %d/%d \t%s HP: %d", player.getHealth(),
+                player.getMaxHealth(), currentEnemy.getName(), currentEnemy.getHealth()));
     }
 
     /**
@@ -505,6 +618,15 @@ public class Game {
         } else {
             return true; // signal that we want to quit
         }
+    }
+
+    private void retry() {
+        Game newGame = new Game();
+    }
+
+    private void died() {
+        died = true;
+        System.out.println("You got yourself killed, do better.\n\nRestart? [Y/N]");
     }
 
     private boolean hasEnemy() {

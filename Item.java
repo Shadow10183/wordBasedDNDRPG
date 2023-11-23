@@ -194,3 +194,33 @@ class Gamemap extends Item {
         updateBlurred();
     }
 }
+
+class HealthPotion extends Item {
+    private int count;
+
+    public HealthPotion(int count) {
+        super("healthPotion", "Restores half of your health.");
+        itemtype = "healthPotion";
+        this.count = count;
+    }
+
+    public void add(int count) {
+        this.count += count;
+    }
+
+    public int getCount() {
+        return count;
+    }
+
+    public void use(Player player) {
+        if (count <= 0) {
+            System.out.println("You don't have any more.");
+            return;
+        }
+        int health = Math.min(Math.ceilDiv(player.getMaxHealth(), 2), player.getMaxHealth() - player.getHealth());
+        player.heal(health);
+        count -= 1;
+        System.out.println(String.format("You recovered %d hp, current hp: %d/%d", health, player.getHealth(),
+                player.getMaxHealth()));
+    }
+}

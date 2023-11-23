@@ -15,6 +15,10 @@ public class Player {
         health -= damage;
     }
 
+    public void heal(int health) {
+        this.health = Math.min(maxHealth, this.health + health);
+    }
+
     public int getHealth() {
         return health;
     }
@@ -33,6 +37,7 @@ public class Player {
 
     public void levelUp(int level) {
         if (level > this.level) {
+            this.level = level;
             switch (level) {
                 case 1:
                     health = 7;

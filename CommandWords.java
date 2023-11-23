@@ -12,10 +12,14 @@
 public class CommandWords {
     // a constant array that holds all valid command words
     private static final String[] validCommands = {
+            "go", "back", "quit", "search", "pickup", "use", "drop", "inventory", "help", "equip", "attack", "cast",
+            "roll", "retry"
+    };
+    private static final String[] validExplorationCommands = {
             "go", "back", "quit", "search", "pickup", "use", "drop", "inventory", "help", "equip", "attack"
     };
     private static final String[] validCombatCommands = {
-            "quit", "use", "inventory", "help", "attack"
+            "quit", "use", "inventory", "help", "attack", "cast", "roll"
     };
 
     /**
@@ -42,8 +46,8 @@ public class CommandWords {
     /**
      * Print all valid commands to System.out.
      */
-    public void showAll() {
-        for (String command : validCommands) {
+    public void showExploration() {
+        for (String command : validExplorationCommands) {
             System.out.print(command + "  ");
         }
         System.out.println();

@@ -5,10 +5,13 @@ implement weapon done
 implement attack "enemy" done
 implement enemy done
 test weapon and enemy done
-create high level weapons and enemies
-implement spells, books and cast command (cast "spell" "enemy")
-implement healpotion and place them around map or enemies (random drop from defeated enemies?50% chance? roll d20?)
+implemented dying and retrying done
+create high level weapons and enemies done
 
+implement healpotion done and place them around map done or enemies wip (random drop from defeated enemies?50% chance? roll d20?)
+implement enemy drop wip
+
+implement spells, books and cast command (cast "spell" "enemy")
 item weight, immovable items (lectern/anvil)
 
 add comments to item, game, d20, room(name), parser/commandwords (combat section), enemy, player
