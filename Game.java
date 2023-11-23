@@ -101,7 +101,6 @@ public class Game {
         inventory.add(map);
 
         // add enemy drops
-        imp.addDrop(new HealthPotion(2), 1);
 
         // initialise room exits
         spawn.setExit("east", eastPier);

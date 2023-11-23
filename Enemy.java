@@ -11,6 +11,7 @@ public class Enemy {
     public Enemy(String name, int level) {
         this.name = name;
         this.level = level;
+        addDrop(new HealthPotion(2), 0.5);
         switch (level) {
             case 1:
                 health = 5;
