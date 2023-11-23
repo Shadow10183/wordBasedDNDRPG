@@ -15,6 +15,7 @@
 
 import java.util.Set;
 import java.util.HashMap;
+import java.util.Map.Entry;
 
 public class Room {
     private String name;
@@ -115,6 +116,10 @@ public class Room {
             returnString += " " + exit;
         }
         return returnString;
+    }
+
+    public Set<Entry<String, Room>> getAllExits() {
+        return exits.entrySet();
     }
 
     /**

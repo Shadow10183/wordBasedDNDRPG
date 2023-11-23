@@ -37,6 +37,14 @@ public abstract class Item {
         this.description = description;
     }
 
+    public void use() {
+        System.out.println("You can't use this here.");
+    }
+
+    public void use(Player player) {
+        System.out.println("You can't use this here.");
+    }
+
     public String getName() {
         return name;
     }
@@ -61,6 +69,11 @@ class Key extends Item {
         direction = leadingdirection;
     }
 
+    public void use() {
+        getUnlock().unlock();
+        System.out.println("A room has been unlocked.");
+    }
+
     public Room getUnlock() {
         return roomUnlock;
     }
@@ -80,7 +93,7 @@ class Weapon extends Item {
     }
 
     public void attack(Enemy enemy) {
-        D20 dice = new D20();
+        // D20 dice = new D20();
         // int turnDamage = (int) ((damage * (0.45 + dice.roll() / 20)));
         enemy.takeDamage(damage);
         System.out.println(String.format("You attack %s with %s, it did %d damage.", enemy.getName(), name, damage));
@@ -157,8 +170,8 @@ class Gamemap extends Item {
         updatePointer("Spawn");
     }
 
-    public String getMap() {
-        return blurMap;
+    public void use() {
+        System.out.println("You pull out your map.\n" + blurMap);
     }
 
     public void updatePointer(String roomname) {
@@ -223,4 +236,16 @@ class HealthPotion extends Item {
         System.out.println(String.format("You recovered %d hp, current hp: %d/%d", health, player.getHealth(),
                 player.getMaxHealth()));
     }
+}
+
+class UpgradeItem extends Item {
+    private Item originalItem;
+    private Item replacementItem;
+
+    public UpgradeItem(String name, String description, Item originalItem, Item replacementItem) {
+        super(name, description);
+        this.originalItem = originalItem;
+        this.replacementItem = replacementItem;
+    }
+
 }

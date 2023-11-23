@@ -453,28 +453,27 @@ public class Game {
             return;
         }
         String itemname = command.getSecondWord();
-        if (itemname.equals("map")) {
-            System.out.println("You pull out your map.\n" + map.getMap());
-            return;
-        }
         for (Item item : inventory) {
             if (item.getName().equals(itemname)) {
                 switch (item.getItemtype()) {
+                    case "map":
+                        item.use();
+                        return;
                     case "key":
                         Key key = (Key) item;
-                        if (currentRoom.getExit(key.getDirection()) == key.getUnlock()) {
-                            key.getUnlock().unlock();
-                            map.unlock((key).getUnlock().getName());
-                            inventory.remove(item);
-                            System.out.println("A room has been unlocked.");
-                            System.out.println(currentRoom.getLongDescription());
-                            return;
-                        } else {
-                            System.out.println("You can't use this here.");
-                            return;
+                        for (Entry<String, Room> entry : currentRoom.getAllExits()) {
+                            if (entry.getValue() == key.getUnlock()) {
+                                key.use();
+                                map.unlock(entry.getValue().getName());
+                                inventory.remove(item);
+                                System.out.println(currentRoom.getLongDescription());
+                                return;
+                            }
                         }
+                        System.out.println("You can't use this here.");
+                        return;
                     case "healthPotion":
-                        ((HealthPotion) item).use(player);
+                        item.use(player);
                         return;
                     default:
                         System.out.println("You can't use this here.");
