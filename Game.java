@@ -321,19 +321,7 @@ public class Game {
             map.updatePointer(currentRoom.getName());
             path.add(currentRoom);
         }
-        for (Entry<Enemy, Room> entry : enemyList.entrySet()) {
-            if (entry.getKey().getMoving()) {
-                boolean validRoom = false;
-                Room enemyNextRoom = null;
-                while (!validRoom) {
-                    enemyNextRoom = entry.getValue().getRandomExit();
-                    if (randomRooms.contains(enemyNextRoom)) {
-                        validRoom = true;
-                    }
-                }
-                enemyList.put(entry.getKey(), enemyNextRoom);
-            }
-        }
+        enemyMove();
         if (hasEnemy()) {
             System.out.println(currentRoom.getMiddleDescription());
             showEnemy();
@@ -348,6 +336,7 @@ public class Game {
             map.updatePointer(currentRoom.getName());
             path.remove(path.size() - 1);
             System.out.println("You have retraced your path.");
+            enemyMove();
             if (hasEnemy()) {
                 System.out.println(currentRoom.getMiddleDescription());
                 showEnemy();
@@ -689,6 +678,22 @@ public class Game {
     private void died() {
         died = true;
         System.out.println("You got yourself killed, do better.");
+    }
+
+    private void enemyMove() {
+        for (Entry<Enemy, Room> entry : enemyList.entrySet()) {
+            if (entry.getKey().getMoving()) {
+                boolean validRoom = false;
+                Room enemyNextRoom = null;
+                while (!validRoom) {
+                    enemyNextRoom = entry.getValue().getRandomExit();
+                    if (randomRooms.contains(enemyNextRoom)) {
+                        validRoom = true;
+                    }
+                }
+                enemyList.put(entry.getKey(), enemyNextRoom);
+            }
+        }
     }
 
     private void enemyAttack(Enemy currentEnemy) {
