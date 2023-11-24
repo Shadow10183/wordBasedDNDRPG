@@ -80,7 +80,7 @@ public class Command {
     /**
      * @return true if the command has a third word.
      */
-    public boolean ThirdWord() {
+    public boolean hasThirdWord() {
         return (thirdWord != null);
     }
 }

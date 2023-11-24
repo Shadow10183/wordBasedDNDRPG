@@ -6,11 +6,13 @@ public class Enemy {
     private int health;
     private int damage;
     private boolean hasDrop = false;
+    private boolean moving;
     private HashMap<Item, Double> drops = new HashMap<>();
 
-    public Enemy(String name, int level) {
+    public Enemy(String name, int level, boolean moving) {
         this.name = name;
         this.level = level;
+        this.moving = moving;
         addDrop(new HealthPotion(2), 0.5);
         switch (level) {
             case 1:
@@ -58,6 +60,10 @@ public class Enemy {
 
     public String getName() {
         return name;
+    }
+
+    public boolean getMoving() {
+        return moving;
     }
 
     public boolean hasDrop() {

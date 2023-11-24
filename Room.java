@@ -122,6 +122,18 @@ public class Room {
         return exits.entrySet();
     }
 
+    public Room getRandomExit() {
+        int randomIndex = (int) (Math.random() * exits.size());
+        int index = 0;
+        for (Entry<String, Room> entry : exits.entrySet()) {
+            if (randomIndex == index) {
+                return entry.getValue();
+            }
+            index += 1;
+        }
+        return null;
+    }
+
     /**
      * Return the room that is reached if we go from this room in direction
      * "direction". If there is no room in that direction, return null.

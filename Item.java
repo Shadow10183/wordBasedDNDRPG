@@ -26,11 +26,13 @@
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.Scanner;
+import java.util.ArrayList;
 
 public abstract class Item {
     protected String name;
     protected String itemtype;
     protected String description;
+    protected boolean movable = true;
 
     public Item(String name, String description) {
         this.name = name;
@@ -38,10 +40,6 @@ public abstract class Item {
     }
 
     public void use() {
-        System.out.println("You can't use this here.");
-    }
-
-    public void use(Player player) {
         System.out.println("You can't use this here.");
     }
 
@@ -55,6 +53,10 @@ public abstract class Item {
 
     public String getItemtype() {
         return itemtype;
+    }
+
+    public Boolean getMovable() {
+        return movable;
     }
 }
 
@@ -225,16 +227,13 @@ class HealthPotion extends Item {
         return count;
     }
 
-    public void use(Player player) {
-        if (count <= 0) {
-            System.out.println("You don't have any more.");
-            return;
-        }
+    public int use(Player player) {
         int health = Math.min(Math.ceilDiv(player.getMaxHealth(), 2), player.getMaxHealth() - player.getHealth());
         player.heal(health);
         count -= 1;
         System.out.println(String.format("You recovered %d hp, current hp: %d/%d", health, player.getHealth(),
                 player.getMaxHealth()));
+        return count;
     }
 }
 
@@ -246,6 +245,44 @@ class UpgradeItem extends Item {
         super(name, description);
         this.originalItem = originalItem;
         this.replacementItem = replacementItem;
+        itemtype = "upgradeItem";
     }
 
+    public Item getOriginalItem() {
+        return originalItem;
+    }
+
+    public Item getReplacementItem() {
+        return replacementItem;
+    }
+}
+
+class UpgradePoint extends Item {
+    private String upgradeType;
+
+    public UpgradePoint(String name, String description, String upgradeType) {
+        super(name, description);
+        itemtype = "upgradePoint";
+        this.upgradeType = upgradeType;
+        movable = false;
+    }
+
+    public Item use(Item item, ArrayList<Item> inventory) {
+        if (item.getItemtype() != upgradeType) {
+            System.out.println("You can't upgrade that here.");
+            return item;
+        }
+        for (Item secondItem : inventory) {
+            if (secondItem.getItemtype() == "upgradeItem" && ((UpgradeItem) secondItem).getOriginalItem() == item) {
+                UpgradeItem upgradeItem = (UpgradeItem) secondItem;
+                item = upgradeItem.getReplacementItem();
+                System.out.println(String.format("You upgraded %s into %s.", upgradeItem.getOriginalItem().getName(),
+                        upgradeItem.getReplacementItem().getName()));
+                inventory.remove(upgradeItem);
+                return upgradeItem.getReplacementItem();
+            }
+        }
+        System.out.println("You don't have the necessary item to upgrade this.");
+        return item;
+    }
 }

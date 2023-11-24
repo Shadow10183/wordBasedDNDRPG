@@ -37,6 +37,7 @@ public class Game {
 
     public static void main(String[] args) {
         Game mygame = new Game();
+        mygame.play();
     }
 
     /**
@@ -45,7 +46,6 @@ public class Game {
     public Game() {
         createEntities();
         parser = new Parser();
-        play();
     }
 
     /**
@@ -71,7 +71,8 @@ public class Game {
                 "You go through a strange doorway and a bright flash dazzles your vision.");
 
         // create the items
-        Item blackHallKey, throneRoomKey, stick, butterKnife, rustySword, honedSword, healthPotion1, healthPotion2;
+        Item blackHallKey, throneRoomKey, stick, butterKnife, rustySword, honedSword, healthPotionx2, healthPotionx3,
+                anvil, sharpeningStone;
         map = new Gamemap("map", "Gives you a bird's eye view.");
         blackHallKey = new Key("blackHallKey", "Unlocks the way to Black Hall.", blackHall, "north");
         throneRoomKey = new Key("throneRoomKey", "Unlocks the way to the Throne Room.", throneRoom, "north");
@@ -79,16 +80,21 @@ public class Game {
         butterKnife = new Weapon("butterKnife", "A common utensil with an uncommonly sharp edge.", 4);
         rustySword = new Weapon("rustySword", "This must've been discarded for quite some time.", 5);
         honedSword = new Weapon("honedSword", "Given new life from a fresh sharpening, it thanks your benevolence.", 8);
-        healthPotion1 = new HealthPotion(2);
-        healthPotion2 = new HealthPotion(3);
+        healthPotionx2 = new HealthPotion(2);
+        healthPotionx3 = new HealthPotion(3);
+        anvil = new UpgradePoint("anvil", "A place to upgrade weapons", "weapon");
+        sharpeningStone = new UpgradeItem("sharpeningStone", "Can be used to sharpen a dulled edge.", rustySword,
+                honedSword);
 
         // create the enemies
-        Enemy imp, goblin, troll, ogre, bigbad;
-        enemyList.put(imp = new Enemy("Imp", 1), blackHall);
-        enemyList.put(goblin = new Enemy("Goblin", 2), courtyard);
-        enemyList.put(troll = new Enemy("Troll", 2), diningHall);
-        enemyList.put(ogre = new Enemy("Ogre", 3), library);
-        enemyList.put(bigbad = new Enemy("Titan", 4), throneRoom);
+        Enemy imp, goblin, troll, ogre, bigbad, mimic, geoguy;
+        enemyList.put(imp = new Enemy("Imp", 1, false), blackHall);
+        enemyList.put(goblin = new Enemy("Goblin", 2, false), courtyard);
+        enemyList.put(troll = new Enemy("Troll", 2, false), diningHall);
+        enemyList.put(ogre = new Enemy("Ogre", 3, false), library);
+        enemyList.put(bigbad = new Enemy("Titan", 4, false), throneRoom);
+        enemyList.put(mimic = new Enemy("Mimic", 1, true), library);
+        enemyList.put(geoguy = new Enemy("Geoguy", 1, true), library);
 
         // place the items
         itemLocations.put(blackHallKey, westPier);
@@ -96,11 +102,14 @@ public class Game {
         itemLocations.put(stick, eastPier);
         itemLocations.put(butterKnife, pantry);
         itemLocations.put(rustySword, armoury);
-        itemLocations.put(healthPotion1, eastPier);
-        itemLocations.put(healthPotion2, westPier);
+        itemLocations.put(healthPotionx2, eastPier);
+        itemLocations.put(healthPotionx3, westPier);
+        itemLocations.put(anvil, armoury);
         inventory.add(map);
 
         // add enemy drops
+        mimic.addDrop(new HealthPotion(5), 1);
+        geoguy.addDrop(sharpeningStone, 1);
 
         // initialise room exits
         spawn.setExit("east", eastPier);
@@ -150,9 +159,9 @@ public class Game {
         boolean finished = false;
         while (!finished) {
             Command command = parser.getCommand();
-            finished = processCommand(command);
+            finished = processCommand(command) || died;
         }
-        System.out.println("Thank you for playing.  Good bye.");
+        System.out.println("Thank you for playing. Good bye.");
     }
 
     /**
@@ -183,19 +192,7 @@ public class Game {
 
         String commandWord = command.getCommandWord().toLowerCase();
 
-        if (died) {
-            switch (commandWord) {
-                case "quit":
-                    wantToQuit = quit(command);
-                    return wantToQuit;
-                case "retry":
-                    retry();
-                    return wantToQuit;
-                default:
-                    System.out.println("Dude you died.");
-                    return wantToQuit;
-            }
-        } else if (inCombat) {
+        if (inCombat) {
             switch (commandWord) {
                 case "help":
                     printCombatHelp();
@@ -240,7 +237,7 @@ public class Game {
                     useItem(command);
                     return wantToQuit;
                 case "drop":
-                    drop(command);
+                    userDrop(command);
                     return wantToQuit;
                 case "equip":
                     equipWeapon(command);
@@ -273,6 +270,11 @@ public class Game {
         parser.showExplorationCommands();
     }
 
+    /**
+     * Print out some help information while in combat.
+     * Here we print some stupid, cryptic message and a list of the
+     * command words specific to combat.
+     */
     private void printCombatHelp() {
         System.out.println("You are in the middle of a battle.");
         System.out.println("Stand strong adventurer, and prevail.");
@@ -305,29 +307,38 @@ public class Game {
 
         if (nextRoom == null) {
             System.out.println("There is no door!");
+            return;
         } else if (nextRoom.isLocked() == true) {
             System.out.println("The door is locked. Maybe you should find a key.");
+            return;
         } else if (nextRoom == teleporter) {
             System.out.println(teleporter.getShortDescription());
             currentRoom = randomRooms.get((int) (Math.random() * randomRooms.size()));
             map.updatePointer(currentRoom.getName());
             path.add(currentRoom);
-            if (hasEnemy()) {
-                System.out.println(currentRoom.getMiddleDescription());
-                showEnemy();
-            } else {
-                System.out.println(currentRoom.getLongDescription());
-            }
         } else {
             currentRoom = nextRoom;
             map.updatePointer(currentRoom.getName());
             path.add(currentRoom);
-            if (hasEnemy()) {
-                System.out.println(currentRoom.getMiddleDescription());
-                showEnemy();
-            } else {
-                System.out.println(currentRoom.getLongDescription());
+        }
+        for (Entry<Enemy, Room> entry : enemyList.entrySet()) {
+            if (entry.getKey().getMoving()) {
+                boolean validRoom = false;
+                Room enemyNextRoom = null;
+                while (!validRoom) {
+                    enemyNextRoom = entry.getValue().getRandomExit();
+                    if (randomRooms.contains(enemyNextRoom)) {
+                        validRoom = true;
+                    }
+                }
+                enemyList.put(entry.getKey(), enemyNextRoom);
             }
+        }
+        if (hasEnemy()) {
+            System.out.println(currentRoom.getMiddleDescription());
+            showEnemy();
+        } else {
+            System.out.println(currentRoom.getLongDescription());
         }
     }
 
@@ -387,9 +398,15 @@ public class Game {
             return;
         }
         String itemname = command.getSecondWord();
+        boolean movable;
         boolean pickedup = false;
         for (Entry<Item, Room> entry : itemLocations.entrySet()) {
             if (entry.getValue() == currentRoom && entry.getKey().getName().equals(itemname)) {
+                movable = entry.getKey().getMovable();
+                if (!movable) {
+                    System.out.println("This thing is affixed to the ground, it won't budge.");
+                    return;
+                }
                 pickedup = true;
                 String itemType = entry.getKey().getItemtype();
                 if (itemType != "healthPotion") {
@@ -435,13 +452,14 @@ public class Game {
                     }
                 }
                 System.out.println();
-                return;
             }
+            return;
         }
         String itemname = command.getSecondWord();
         for (Item item : inventory) {
             if (item.getName().equals(itemname)) {
                 System.out.println(item.getDescription());
+                return;
             }
         }
     }
@@ -452,11 +470,39 @@ public class Game {
             return;
         }
         String itemname = command.getSecondWord();
+        for (Entry<Item, Room> entry : itemLocations.entrySet()) {
+            Item item = entry.getKey();
+            if (entry.getValue() == currentRoom && item.getItemtype() == "upgradePoint"
+                    && item.getName().equals(itemname)) {
+                if (!command.hasThirdWord()) {
+                    System.out.println(
+                            "What are you doing with this.\n(hint: include item to be upgraded as third word)");
+                }
+                String secondItemName = command.getThirdWord();
+                UpgradePoint upgradePoint = (UpgradePoint) item;
+                for (int i = 0; i < inventory.size(); i++) {
+                    if (inventory.get(i).getName().equals(secondItemName)) {
+                        inventory.set(i, upgradePoint.use(inventory.get(i), inventory));
+                        if (player.getWeapon().getName().equals(secondItemName)) {
+                            player.equipWeapon((Weapon) inventory.get(i));
+                        }
+                        return;
+                    }
+                }
+                System.out.println("You can't upgrade what you don't have.");
+                return;
+            }
+        }
         for (Item item : inventory) {
             if (item.getName().equals(itemname)) {
                 switch (item.getItemtype()) {
                     case "map":
+                        if (inCombat) {
+                            System.out.println("Why are you trying to use a map when you are getting killed.");
+                            return;
+                        }
                         item.use();
+                        System.out.println(currentRoom.getLongDescription());
                         return;
                     case "key":
                         Key key = (Key) item;
@@ -472,7 +518,13 @@ public class Game {
                         System.out.println("You can't use this here.");
                         return;
                     case "healthPotion":
-                        item.use(player);
+                        HealthPotion healthPotion = (HealthPotion) item;
+                        if (healthPotion.use(player) == 0) {
+                            inventory.remove(item);
+                        }
+                        if (inCombat) {
+                            enemyAttack(currentEnemy);
+                        }
                         return;
                     default:
                         System.out.println("You can't use this here.");
@@ -484,7 +536,7 @@ public class Game {
         return;
     }
 
-    private void drop(Command command) {
+    private void userDrop(Command command) {
         if (!command.hasSecondWord()) {
             System.out.println("Drop what?");
             return;
@@ -492,9 +544,25 @@ public class Game {
         String itemname = command.getSecondWord();
         for (Item item : inventory) {
             if (item.getName().equals(itemname)) {
-                itemLocations.put(item, currentRoom);
+                if (item.getItemtype() == "healthPotion") {
+                    boolean itemfound = false;
+                    for (Entry<Item, Room> roomEntry : itemLocations.entrySet()) {
+                        if (roomEntry.getValue() == currentRoom
+                                && roomEntry.getKey().getItemtype() == "healthPotion") {
+                            itemfound = true;
+                            ((HealthPotion) roomEntry.getKey()).add(((HealthPotion) item).getCount());
+                        }
+                    }
+                    if (!itemfound) {
+                        itemLocations.put(item, currentRoom);
+                    }
+                    System.out.println(
+                            String.format("You dropped %sx%d ", item.getName(), ((HealthPotion) item).getCount()));
+                } else {
+                    itemLocations.put(item, currentRoom);
+                    System.out.println(String.format("You dropped %s.", itemname));
+                }
                 inventory.remove(item);
-                System.out.println(String.format("You dropped %s.", itemname));
                 return;
             }
         }
@@ -514,12 +582,14 @@ public class Game {
                 }
                 player.equipWeapon((Weapon) item);
                 System.out.println(itemname + " has been equipped.");
+                return;
             }
         }
+        System.out.println("You can't equip what you don't have.");
     }
 
     private void attack(Command command) {
-        if (!command.hasSecondWord()) {
+        if (!command.hasSecondWord() && currentEnemy == null) {
             System.out.println("Attack what?");
             return;
         }
@@ -538,6 +608,11 @@ public class Game {
             if (currentEnemy.getHealth() <= 0) {
                 System.out.println(String.format("%s has been defeated.", currentEnemy.getName()));
                 inCombat = false;
+                if (currentEnemy.getName() == "Titan") {
+                    System.out.println("Congratulations! You have ridded this castle of its infestations.");
+                    died = true;
+                    return;
+                }
                 player.levelUp(currentEnemy.getLevel() + 1);
                 if (!currentEnemy.hasDrop()) {
                     String dropresult = "";
@@ -571,9 +646,12 @@ public class Game {
                                     : dropresult + " " + itemName;
                         }
                     }
-                    System.out.println("It dropped\n" + dropresult);
+                    if (dropresult != "") {
+                        System.out.println("It dropped\n" + dropresult);
+                    }
                 }
                 enemyList.remove(currentEnemy);
+                currentEnemy = null;
                 hasEnemy();
                 showEnemy();
             } else {
@@ -591,18 +669,6 @@ public class Game {
 
     }
 
-    private void enemyAttack(Enemy currentEnemy) {
-        player.takeDamage(currentEnemy.getDamage());
-        System.out
-                .println(String.format("%s does %d damage to you.", currentEnemy.getName(), currentEnemy.getDamage()));
-        if (player.getHealth() <= 0) {
-            died();
-            return;
-        }
-        System.out.println(String.format("Your HP: %d/%d \t%s HP: %d", player.getHealth(),
-                player.getMaxHealth(), currentEnemy.getName(), currentEnemy.getHealth()));
-    }
-
     /**
      * "Quit" was entered. Check the rest of the command to see
      * whether we really quit the game.
@@ -618,13 +684,23 @@ public class Game {
         }
     }
 
-    private void retry() {
-        Game newGame = new Game();
-    }
+    // implements methods that are used by user commands
 
     private void died() {
         died = true;
-        System.out.println("You got yourself killed, do better.\n\nRestart? [Y/N]");
+        System.out.println("You got yourself killed, do better.");
+    }
+
+    private void enemyAttack(Enemy currentEnemy) {
+        player.takeDamage(currentEnemy.getDamage());
+        System.out
+                .println(String.format("%s does %d damage to you.", currentEnemy.getName(), currentEnemy.getDamage()));
+        if (player.getHealth() <= 0) {
+            died();
+            return;
+        }
+        System.out.println(String.format("Your HP: %d/%d \t%s HP: %d", player.getHealth(),
+                player.getMaxHealth(), currentEnemy.getName(), currentEnemy.getHealth()));
     }
 
     private boolean hasEnemy() {
