@@ -404,19 +404,34 @@ public class Game {
                             String.format("You picked up the %s and put it in your inventory.",
                                     entry.getKey().getName()));
                 } else {
+                    HealthPotion healthPotion = (HealthPotion) entry.getKey();
+                    int count = healthPotion.getCount();
+                    if (command.hasThirdWord()) {
+                        try {
+                            count = Math.min(Integer.parseInt(command.getThirdWord()), healthPotion.getCount());
+                        } catch (NumberFormatException ex) {
+                            ex.printStackTrace();
+                        }
+                    }
                     boolean itemfound = false;
                     for (Item item : inventory) {
                         if (item.getItemtype() == itemType) {
                             itemfound = true;
-                            ((HealthPotion) item).add(((HealthPotion) entry.getKey()).getCount());
+                            ((HealthPotion) item).add(count);
                         }
                     }
-                    if (!itemfound) {
-                        inventory.add(entry.getKey());
-                    }
                     System.out.println(
-                            String.format("You picked up the %s(s) and put it in your inventory.",
-                                    entry.getKey().getName()));
+                            String.format("You picked up %sx%d and put it in your inventory.",
+                                    healthPotion.getName(), count));
+                    if (!itemfound) {
+                        if (count == healthPotion.getCount()) {
+                            inventory.add(healthPotion);
+                        } else {
+                            inventory.add(new HealthPotion(count));
+                            healthPotion.remove(count);
+                            return;
+                        }
+                    }
                 }
                 itemLocations.remove(entry.getKey());
                 return;
@@ -534,19 +549,35 @@ public class Game {
         for (Item item : inventory) {
             if (item.getName().equals(itemname)) {
                 if (item.getItemtype() == "healthPotion") {
+                    HealthPotion healthPotion = (HealthPotion) item;
+                    int count = healthPotion.getCount();
+                    if (command.hasThirdWord()) {
+                        try {
+                            count = Math.min(Integer.parseInt(command.getThirdWord()), healthPotion.getCount());
+                        } catch (NumberFormatException ex) {
+                            ex.printStackTrace();
+                        }
+                    }
                     boolean itemfound = false;
                     for (Entry<Item, Room> roomEntry : itemLocations.entrySet()) {
                         if (roomEntry.getValue() == currentRoom
                                 && roomEntry.getKey().getItemtype() == "healthPotion") {
                             itemfound = true;
-                            ((HealthPotion) roomEntry.getKey()).add(((HealthPotion) item).getCount());
+                            ((HealthPotion) roomEntry.getKey()).add(count);
                         }
                     }
-                    if (!itemfound) {
-                        itemLocations.put(item, currentRoom);
-                    }
                     System.out.println(
-                            String.format("You dropped %sx%d ", item.getName(), ((HealthPotion) item).getCount()));
+                            String.format("You dropped %sx%d ", healthPotion.getName(),
+                                    (Math.min(count, healthPotion.getCount()))));
+                    if (!itemfound) {
+                        if (count == healthPotion.getCount()) {
+                            itemLocations.put(healthPotion, currentRoom);
+                        } else {
+                            itemLocations.put(new HealthPotion(count), currentRoom);
+                            healthPotion.remove(count);
+                            return;
+                        }
+                    }
                 } else {
                     itemLocations.put(item, currentRoom);
                     System.out.println(String.format("You dropped %s.", itemname));
@@ -555,6 +586,7 @@ public class Game {
                 return;
             }
         }
+        System.out.println("What are you trying to drop.");
     }
 
     private void equipWeapon(Command command) {

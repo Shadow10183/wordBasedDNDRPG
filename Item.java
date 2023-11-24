@@ -224,6 +224,10 @@ class HealthPotion extends Item {
         this.count += count;
     }
 
+    public void remove(int count) {
+        this.count -= count;
+    }
+
     public int getCount() {
         return count;
     }
