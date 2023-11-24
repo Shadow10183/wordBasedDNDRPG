@@ -1,4 +1,3 @@
-
 /**
  * Class D20 - a dice in an adventure game.
  *
