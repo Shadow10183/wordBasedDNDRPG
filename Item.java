@@ -95,10 +95,11 @@ class Weapon extends Item {
     }
 
     public void attack(Enemy enemy) {
-        // D20 dice = new D20();
-        // int turnDamage = (int) ((damage * (0.45 + dice.roll() / 20)));
-        enemy.takeDamage(damage);
-        System.out.println(String.format("You attack %s with %s, it did %d damage.", enemy.getName(), name, damage));
+        D20 dice = new D20();
+        int turnDamage = (int) Math.round((damage * (0.5 + ((double) dice.roll() / 20))));
+        enemy.takeDamage(turnDamage);
+        System.out.println(String.format(
+                "You attack %s with %s, it did %d damage.", enemy.getName(), name, turnDamage));
     }
 }
 

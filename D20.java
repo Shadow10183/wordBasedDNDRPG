@@ -1,3 +1,4 @@
+
 /**
  * Class D20 - a dice in an adventure game.
  *
@@ -13,13 +14,13 @@
  * @author Aidan Leung Yau Hei
  * @version 2016.02.29
  */
-
 public class D20 {
     public D20() {
         // do nothing
     }
 
     public int roll() {
+        System.out.println("Rolling the dice!");
         int result = 0;
         int rolls = (int) (Math.random() * 30) + 21;
         for (int i = 0; i < rolls; i++) {
