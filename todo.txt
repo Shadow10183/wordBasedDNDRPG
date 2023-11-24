@@ -1,18 +1,7 @@
-implement map done
-    set 2 map, one map with names, update gate here done
-    2nd map will blur name based on list(hashmap instead?)of map facts done
-implement weapon done
-implement attack "enemy" done
-implement enemy done
-test weapon and enemy done
-implemented dying and retrying done
-create high level weapons and enemies done
+item weight
 
-implement healpotion done and place them around map done or enemies done (random drop from defeated enemies?50% chance? roll d20?)
-implement enemy drop done
+pickup/drop player specified amount of consumables
 
-implement spells, books and cast command (cast "spell" "enemy")
-item weight, immovable items (lectern/anvil)
+(optional) implement spells, books and cast command (cast "spell" "enemy")
 
 add comments to item, game, d20, room(name), parser/commandwords (combat section), enemy, player
-
