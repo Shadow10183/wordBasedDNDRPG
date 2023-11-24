@@ -3,12 +3,16 @@ public class Player {
     private int health;
     private int level;
     private int maxHealth;
+    private int storage;
+    private int maxStorage;
 
     public Player() {
         health = 7;
         maxHealth = 7;
         level = 1;
-        equippedweapon = new Weapon("Fists", "Your bare fists.", 1);
+        storage = 0;
+        maxStorage = 10;
+        equippedweapon = new Weapon("Fists", "Your bare fists.", 0, 1);
     }
 
     public void takeDamage(int damage) {
@@ -33,6 +37,30 @@ public class Player {
 
     public Weapon getWeapon() {
         return equippedweapon;
+    }
+
+    public boolean willPickup(int weight) {
+        return ((storage + weight) <= maxStorage);
+    }
+
+    public void pickup(int weight) {
+        storage += weight;
+    }
+
+    public void drop(int weight) {
+        storage -= weight;
+    }
+
+    public int getStorage() {
+        return storage;
+    }
+
+    public void getBackpack() {
+        maxStorage += 5;
+    }
+
+    public int getMaxStorage() {
+        return maxStorage;
     }
 
     public void levelUp(int level) {

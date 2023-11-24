@@ -72,19 +72,21 @@ public class Game {
 
         // create the items
         Item blackHallKey, throneRoomKey, stick, butterKnife, rustySword, honedSword, healthPotionx2, healthPotionx3,
-                anvil, sharpeningStone;
+                anvil, sharpeningStone, backpack;
         map = new Gamemap("map", "Gives you a bird's eye view.");
         blackHallKey = new Key("blackHallKey", "Unlocks the way to Black Hall.", blackHall, "north");
         throneRoomKey = new Key("throneRoomKey", "Unlocks the way to the Throne Room.", throneRoom, "north");
-        stick = new Weapon("stick", "Cool pointy stick you found.", 2);
-        butterKnife = new Weapon("butterKnife", "A common utensil with an uncommonly sharp edge.", 4);
-        rustySword = new Weapon("rustySword", "This must've been discarded for quite some time.", 5);
-        honedSword = new Weapon("honedSword", "Given new life from a fresh sharpening, it thanks your benevolence.", 8);
+        stick = new Weapon("stick", "Cool pointy stick you found.", 2, 2);
+        butterKnife = new Weapon("butterKnife", "A common utensil with an uncommonly sharp edge.", 3, 4);
+        rustySword = new Weapon("rustySword", "This must've been discarded for quite some time.", 5, 5);
+        honedSword = new Weapon("honedSword", "Given new life from a fresh sharpening, it thanks your benevolence.", 5,
+                8);
         healthPotionx2 = new HealthPotion(2);
         healthPotionx3 = new HealthPotion(3);
         anvil = new UpgradePoint("anvil", "A place to upgrade weapons", "weapon");
         sharpeningStone = new UpgradeItem("sharpeningStone", "Can be used to sharpen a dulled edge.", rustySword,
                 honedSword);
+        backpack = new Backpack();
 
         // create the enemies
         Enemy imp, goblin, troll, ogre, bigbad, mimic, geoguy;
@@ -108,7 +110,7 @@ public class Game {
         inventory.add(map);
 
         // add enemy drops
-        mimic.addDrop(new HealthPotion(5), 1);
+        mimic.addDrop(backpack, 1);
         geoguy.addDrop(sharpeningStone, 1);
 
         // initialise room exits
@@ -398,40 +400,56 @@ public class Game {
                 }
                 pickedup = true;
                 String itemType = entry.getKey().getItemtype();
-                if (itemType != "healthPotion") {
-                    inventory.add(entry.getKey());
-                    System.out.println(
-                            String.format("You picked up the %s and put it in your inventory.",
-                                    entry.getKey().getName()));
-                } else {
-                    HealthPotion healthPotion = (HealthPotion) entry.getKey();
-                    int count = healthPotion.getCount();
-                    if (command.hasThirdWord()) {
-                        try {
-                            count = Math.min(Integer.parseInt(command.getThirdWord()), healthPotion.getCount());
-                        } catch (NumberFormatException ex) {
-                            ex.printStackTrace();
+                switch (entry.getKey().getItemtype()) {
+                    case "healthPotion":
+                        HealthPotion healthPotion = (HealthPotion) entry.getKey();
+                        int count = healthPotion.getCount();
+                        if (command.hasThirdWord()) {
+                            try {
+                                count = Math.min(Integer.parseInt(command.getThirdWord()), healthPotion.getCount());
+                            } catch (NumberFormatException ex) {
+                                ex.printStackTrace();
+                            }
                         }
-                    }
-                    boolean itemfound = false;
-                    for (Item item : inventory) {
-                        if (item.getItemtype() == itemType) {
-                            itemfound = true;
-                            ((HealthPotion) item).add(count);
-                        }
-                    }
-                    System.out.println(
-                            String.format("You picked up %sx%d and put it in your inventory.",
-                                    healthPotion.getName(), count));
-                    if (!itemfound) {
-                        if (count == healthPotion.getCount()) {
-                            inventory.add(healthPotion);
-                        } else {
-                            inventory.add(new HealthPotion(count));
-                            healthPotion.remove(count);
+                        if (!player.willPickup(healthPotion.getWeight() * count)) {
+                            System.out.println("You are too heavy to pick this up. Lose weight.");
                             return;
                         }
-                    }
+                        player.pickup(healthPotion.getWeight() * count);
+                        boolean itemfound = false;
+                        for (Item item : inventory) {
+                            if (item.getItemtype() == itemType) {
+                                itemfound = true;
+                                ((HealthPotion) item).add(count);
+                            }
+                        }
+                        System.out.println(
+                                String.format("You picked up %sx%d and put it in your inventory.",
+                                        healthPotion.getName(), count));
+                        if (!itemfound) {
+                            if (count == healthPotion.getCount()) {
+                                inventory.add(healthPotion);
+                            } else {
+                                inventory.add(new HealthPotion(count));
+                                healthPotion.remove(count);
+                                return;
+                            }
+                        }
+                        break;
+                    case "backpack":
+                        player.getBackpack();
+                        System.out.println("You put on the backpack and increase your storage capacity.");
+                        break;
+                    default:
+                        if (!player.willPickup(entry.getKey().getWeight())) {
+                            System.out.println("You are too heavy to pick this up. Lose weight.");
+                            return;
+                        }
+                        player.pickup(entry.getKey().getWeight());
+                        inventory.add(entry.getKey());
+                        System.out.println(
+                                String.format("You picked up the %s and put it in your inventory.",
+                                        entry.getKey().getName()));
                 }
                 itemLocations.remove(entry.getKey());
                 return;
@@ -447,7 +465,8 @@ public class Game {
             if (inventory.size() == 0) {
                 System.out.println("You have no items in inventory.");
             } else {
-                System.out.println("Your inventory contains:");
+                System.out.println(
+                        String.format("Your inventory contains: [%d/%d]", player.getStorage(), player.getMaxStorage()));
                 for (Item item : inventory) {
                     if (item.getItemtype() != "healthPotion") {
                         System.out.print(item.getName() + " ");
@@ -551,6 +570,7 @@ public class Game {
                 if (item.getItemtype() == "healthPotion") {
                     HealthPotion healthPotion = (HealthPotion) item;
                     int count = healthPotion.getCount();
+                    player.drop(healthPotion.getWeight() * count);
                     if (command.hasThirdWord()) {
                         try {
                             count = Math.min(Integer.parseInt(command.getThirdWord()), healthPotion.getCount());
@@ -579,6 +599,11 @@ public class Game {
                         }
                     }
                 } else {
+                    if (item == player.getWeapon()) {
+                        System.out.println("You can't drop something that is currently equipped.");
+                        return;
+                    }
+                    player.drop(item.getWeight());
                     itemLocations.put(item, currentRoom);
                     System.out.println(String.format("You dropped %s.", itemname));
                 }

@@ -32,11 +32,13 @@ public abstract class Item {
     protected String name;
     protected String itemtype;
     protected String description;
+    protected int weight;
     protected boolean movable = true;
 
-    public Item(String name, String description) {
+    public Item(String name, String description, int weight) {
         this.name = name;
         this.description = description;
+        this.weight = weight;
     }
 
     public void use() {
@@ -48,11 +50,15 @@ public abstract class Item {
     }
 
     public String getDescription() {
-        return description;
+        return description + " Weight: " + weight;
     }
 
     public String getItemtype() {
         return itemtype;
+    }
+
+    public int getWeight() {
+        return weight;
     }
 
     public Boolean getMovable() {
@@ -65,7 +71,7 @@ class Key extends Item {
     private String direction;
 
     public Key(String name, String description, Room room, String leadingdirection) {
-        super(name, description);
+        super(name, description, 0);
         itemtype = "key";
         roomUnlock = room;
         direction = leadingdirection;
@@ -88,8 +94,8 @@ class Key extends Item {
 class Weapon extends Item {
     private int damage;
 
-    public Weapon(String name, String description, int damage) {
-        super(name, description);
+    public Weapon(String name, String description, int weight, int damage) {
+        super(name, description, weight);
         itemtype = "weapon";
         this.damage = damage;
     }
@@ -105,7 +111,7 @@ class Weapon extends Item {
 
 class Book extends Item {
     public Book(String name, String description) {
-        super(name, description);
+        super(name, description, 1);
         itemtype = "book";
     }
 }
@@ -158,7 +164,7 @@ class Gamemap extends Item {
     private HashMap<String, Boolean> visitedFacts = new HashMap<String, Boolean>();
 
     public Gamemap(String name, String description) {
-        super(name, description);
+        super(name, description, 0);
         itemtype = "map";
         visitedFacts.put("Spawn", true);
         visitedFacts.put("East pier", false);
@@ -215,7 +221,7 @@ class HealthPotion extends Item {
     private int count;
 
     public HealthPotion(int count) {
-        super("healthPotion", "Restores half of your health.");
+        super("healthPotion", "Restores half of your health.", 1);
         itemtype = "healthPotion";
         this.count = count;
     }
@@ -230,6 +236,10 @@ class HealthPotion extends Item {
 
     public int getCount() {
         return count;
+    }
+
+    public String getDescription() {
+        return description + " Total weight: " + weight * count;
     }
 
     public int use(Player player) {
@@ -247,7 +257,7 @@ class UpgradeItem extends Item {
     private Item replacementItem;
 
     public UpgradeItem(String name, String description, Item originalItem, Item replacementItem) {
-        super(name, description);
+        super(name, description, 1);
         this.originalItem = originalItem;
         this.replacementItem = replacementItem;
         itemtype = "upgradeItem";
@@ -266,7 +276,7 @@ class UpgradePoint extends Item {
     private String upgradeType;
 
     public UpgradePoint(String name, String description, String upgradeType) {
-        super(name, description);
+        super(name, description, 100);
         itemtype = "upgradePoint";
         this.upgradeType = upgradeType;
         movable = false;
@@ -289,5 +299,12 @@ class UpgradePoint extends Item {
         }
         System.out.println("You don't have the necessary item to upgrade this.");
         return item;
+    }
+}
+
+class Backpack extends Item {
+    public Backpack() {
+        super("backpack", "Increases storage", 0);
+        itemtype = "backpack";
     }
 }
