@@ -70,9 +70,14 @@ public class Game {
         teleporter = new Room("Teleporter",
                 "You go through a strange doorway and a bright flash dazzles your vision.");
 
+        // create the spells
+        Spell fireball, lightning;
+        fireball = new Spell("fireball", 7, 3);
+        lightning = new Spell("lightning", 10, 4);
+
         // create the items
         Item blackHallKey, throneRoomKey, stick, butterKnife, rustySword, honedSword, healthPotionx2, healthPotionx3,
-                anvil, sharpeningStone, backpack;
+                anvil, sharpeningStone, backpack, fireballBook, lightningBook;
         map = new Gamemap("map", "Gives you a bird's eye view.");
         blackHallKey = new Key("blackHallKey", "Unlocks the way to Black Hall.", blackHall, "north");
         throneRoomKey = new Key("throneRoomKey", "Unlocks the way to the Throne Room.", throneRoom, "north");
@@ -87,6 +92,8 @@ public class Game {
         sharpeningStone = new UpgradeItem("sharpeningStone", "Can be used to sharpen a dulled edge.", rustySword,
                 honedSword);
         backpack = new Backpack();
+        fireballBook = new Book("fireballBook", "A book containing a powerful spell.", fireball);
+        lightningBook = new Book("lightningBook", "A book containing a powerful spell.", lightning);
 
         // create the enemies
         Enemy imp, goblin, troll, ogre, bigbad, mimic, geoguy;
@@ -107,11 +114,13 @@ public class Game {
         itemLocations.put(healthPotionx2, eastPier);
         itemLocations.put(healthPotionx3, westPier);
         itemLocations.put(anvil, armoury);
+        itemLocations.put(lightningBook, library);
         inventory.add(map);
 
         // add enemy drops
         mimic.addDrop(backpack, 1);
         geoguy.addDrop(sharpeningStone, 1);
+        goblin.addDrop(fireballBook, 1);
 
         // initialise room exits
         spawn.setExit("east", eastPier);
@@ -207,6 +216,9 @@ public class Game {
                     return wantToQuit;
                 case "attack":
                     attack(command);
+                    return wantToQuit;
+                case "cast":
+                    cast(command);
                     return wantToQuit;
                 case "quit":
                     wantToQuit = quit(command);
@@ -540,14 +552,21 @@ public class Game {
                         }
                         System.out.println("You can't use this here.");
                         return;
+                    case "book":
+                        Book book = (Book) item;
+                        book.use(player);
+                        inventory.remove(book);
+                        return;
                     case "healthPotion":
                         HealthPotion healthPotion = (HealthPotion) item;
                         if (healthPotion.use(player) == 0) {
                             inventory.remove(item);
                         }
                         if (inCombat) {
+                            player.recoverMana();
                             enemyAttack(currentEnemy);
                         }
+                        player.drop(healthPotion.getWeight());
                         return;
                     default:
                         System.out.println("You can't use this here.");
@@ -646,72 +665,39 @@ public class Game {
             }
         }
         if (!inCombat) {
+            if (currentEnemy == null) {
+                System.out.println("That enemy doesn't exist.");
+                return;
+            }
             System.out.println(String.format("You enter in a fight with %s.", currentEnemy.getName()));
             inCombat = true;
             return;
         } else {
             player.getWeapon().attack(currentEnemy);
-            if (currentEnemy.getHealth() <= 0) {
-                System.out.println(String.format("%s has been defeated.", currentEnemy.getName()));
-                inCombat = false;
-                if (currentEnemy.getName() == "Titan") {
-                    System.out.println("Congratulations! You have ridded this castle of its infestations.");
-                    died = true;
-                    return;
-                }
-                player.levelUp(currentEnemy.getLevel() + 1);
-                if (!currentEnemy.hasDrop()) {
-                    String dropresult = "";
-                    for (Entry<Item, Double> entry : currentEnemy.getDrops().entrySet()) {
-                        if (Math.random() > entry.getValue()) {
-                            continue;
-                        }
-                        String itemType = entry.getKey().getItemtype();
-                        if (itemType != "healthPotion") {
-                            itemLocations.put(entry.getKey(), currentRoom);
-                            String itemName;
-                            itemName = entry.getKey().getName();
-                            dropresult = (dropresult == "") ? itemName
-                                    : dropresult + " " + itemName;
-                        } else {
-                            boolean itemfound = false;
-                            for (Entry<Item, Room> roomEntry : itemLocations.entrySet()) {
-                                if (roomEntry.getValue() == currentRoom
-                                        && roomEntry.getKey().getItemtype() == itemType) {
-                                    itemfound = true;
-                                    ((HealthPotion) roomEntry.getKey()).add(((HealthPotion) entry.getKey()).getCount());
-                                }
-                            }
-                            if (!itemfound) {
-                                itemLocations.put(entry.getKey(), currentRoom);
-                            }
-                            String itemName;
-                            itemName = entry.getKey().getName()
-                                    + String.format("x%d ", ((HealthPotion) entry.getKey()).getCount());
-                            dropresult = (dropresult == "") ? itemName
-                                    : dropresult + " " + itemName;
-                        }
-                    }
-                    if (dropresult != "") {
-                        System.out.println("It dropped\n" + dropresult);
-                    }
-                }
-                enemyList.remove(currentEnemy);
-                currentEnemy = null;
-                hasEnemy();
-                showEnemy();
-            } else {
-                try {
-                    Thread.sleep(200);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-                enemyAttack(currentEnemy);
-            }
+            player.recoverMana();
+            afterAttack();
         }
     }
 
     private void cast(Command command) {
+        if (!command.hasSecondWord()) {
+            player.showSpells();
+            return;
+        }
+        String spellName = command.getSecondWord();
+        System.out.println(spellName);
+        Spell spell = player.getSpell(spellName);
+        if (spell == null) {
+            return;
+        }
+        if (player.useMana(spell.getManaCost())) {
+            player.cast(spell, currentEnemy);
+            System.out.println(String.format("It consumed %d mana. Current mana: %d/%d", spell.getManaCost(),
+                    player.getMana(), player.getMaxMana()));
+            afterAttack();
+        } else {
+            System.out.println("You don't have enough mana.");
+        }
 
     }
 
@@ -735,6 +721,66 @@ public class Game {
     private void died() {
         died = true;
         System.out.println("You got yourself killed, do better.");
+    }
+
+    private void afterAttack() {
+        if (currentEnemy.getHealth() <= 0) {
+            System.out.println(String.format("%s has been defeated.", currentEnemy.getName()));
+            inCombat = false;
+            if (currentEnemy.getName() == "Titan") {
+                System.out.println("Congratulations! You have ridded this castle of its infestations.");
+                died = true;
+                return;
+            }
+            player.levelUp(currentEnemy.getLevel() + 1);
+            if (!currentEnemy.hasDrop()) {
+                String dropresult = "";
+                for (Entry<Item, Double> entry : currentEnemy.getDrops().entrySet()) {
+                    if (Math.random() > entry.getValue()) {
+                        continue;
+                    }
+                    String itemType = entry.getKey().getItemtype();
+                    if (itemType != "healthPotion") {
+                        itemLocations.put(entry.getKey(), currentRoom);
+                        String itemName;
+                        itemName = entry.getKey().getName();
+                        dropresult = (dropresult == "") ? itemName
+                                : dropresult + " " + itemName;
+                    } else {
+                        boolean itemfound = false;
+                        for (Entry<Item, Room> roomEntry : itemLocations.entrySet()) {
+                            if (roomEntry.getValue() == currentRoom
+                                    && roomEntry.getKey().getItemtype() == itemType) {
+                                itemfound = true;
+                                ((HealthPotion) roomEntry.getKey()).add(((HealthPotion) entry.getKey()).getCount());
+                            }
+                        }
+                        if (!itemfound) {
+                            itemLocations.put(entry.getKey(), currentRoom);
+                        }
+                        String itemName;
+                        itemName = entry.getKey().getName()
+                                + String.format("x%d ", ((HealthPotion) entry.getKey()).getCount());
+                        dropresult = (dropresult == "") ? itemName
+                                : dropresult + " " + itemName;
+                    }
+                }
+                if (dropresult != "") {
+                    System.out.println("It dropped\n" + dropresult);
+                }
+            }
+            enemyList.remove(currentEnemy);
+            currentEnemy = null;
+            hasEnemy();
+            showEnemy();
+        } else {
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            enemyAttack(currentEnemy);
+        }
     }
 
     private void enemyMove() {

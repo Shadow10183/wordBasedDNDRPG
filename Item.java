@@ -110,9 +110,17 @@ class Weapon extends Item {
 }
 
 class Book extends Item {
-    public Book(String name, String description) {
+    private Spell spell;
+
+    public Book(String name, String description, Spell spell) {
         super(name, description, 1);
         itemtype = "book";
+        this.spell = spell;
+    }
+
+    public void use(Player player) {
+        player.addSpell(spell);
+        System.out.println("You learned a new spell: " + spell.getName());
     }
 }
 
