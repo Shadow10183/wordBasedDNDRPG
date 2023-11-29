@@ -14,13 +14,19 @@
  */
 
 import java.util.Set;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Map.Entry;
+import java.util.List;
+import java.util.ArrayList;
 
 public class Room {
+    public static final List<String> validDirections = Arrays.asList("east", "southeast", "south", "southwest", "west",
+            "northwest", "north", "northeast");
     private String name;
     private String description;
     private boolean locked = false;
+    private ArrayList<Enemy> enemies = new ArrayList<>();
+    private ArrayList<Item> items = new ArrayList<>();
     private HashMap<String, Room> exits; // stores exits of this room.
 
     /**
@@ -62,6 +68,10 @@ public class Room {
         exits.put(direction, neighbor);
     }
 
+    /**
+     * @return The name of the room
+     *         (the one that was defined in the constructor).
+     */
     public String getName() {
         return name;
     }
@@ -82,11 +92,7 @@ public class Room {
      * @return A long description of this room
      */
     public String getLongDescription() {
-        return "You are " + description + ".\n" + getExitString();
-    }
-
-    public String getMiddleDescription() {
-        return "You are " + description + ".";
+        return description + "\n" + getExitString();
     }
 
     /**
@@ -118,16 +124,24 @@ public class Room {
         return returnString;
     }
 
-    public Set<Entry<String, Room>> getAllExits() {
-        return exits.entrySet();
+    /**
+     * @return The a set of all exits of the room
+     */
+    public ArrayList<Room> getAllExits() {
+        ArrayList<Room> result = new ArrayList<Room>(exits.values());
+        return result;
     }
 
+    /**
+     * @return A random room that is connected to this room.
+     *         If the room has no exits, returns null.
+     */
     public Room getRandomExit() {
         int randomIndex = (int) (Math.random() * exits.size());
         int index = 0;
-        for (Entry<String, Room> entry : exits.entrySet()) {
+        for (Room exit : exits.values()) {
             if (randomIndex == index) {
-                return entry.getValue();
+                return exit;
             }
             index += 1;
         }
@@ -143,5 +157,80 @@ public class Room {
      */
     public Room getExit(String direction) {
         return exits.get(direction);
+    }
+
+    public void addEnemy(Enemy enemy) {
+        enemies.add(enemy);
+    }
+
+    public void removeEnemy(Enemy enemy) {
+        enemies.remove(enemy);
+    }
+
+    public ArrayList<Enemy> getEnemies() {
+        return enemies;
+    }
+
+    /**
+     * @return Whether there are enemies in the room
+     */
+    public boolean hasEnemy() {
+        if (enemies.isEmpty()) {
+            return false;
+        }
+        return true;
+    }
+
+    public void showEnemy() {
+        if (hasEnemy()) {
+            for (Enemy enemy : enemies) {
+                System.out.println(String.format("A(n) %s sizes you up.", enemy.getName()));
+            }
+        }
+    }
+
+    public void addItem(Item item) {
+        items.add(item);
+    }
+
+    public void removeItem(Item item) {
+        items.remove(item);
+    }
+
+    public void showItems() {
+        System.out.println("You search the room and find");
+        String result = "";
+        for (Item item : items) {
+            if (item.getItemtype() != "healthPotion") {
+                result += item.getName() + " ";
+            } else {
+                result += item.getName() + String.format("x%d ", ((HealthPotion) item).getWeight());
+            }
+        }
+        if (result == "") {
+            System.out.println("nothing. There is nothing but the void here...");
+        } else {
+            System.out.println(result);
+        }
+    }
+
+    public ArrayList<Item> getItems() {
+        return items;
+    }
+}
+
+class Teleporter extends Room {
+    private ArrayList<Room> roomList = new ArrayList<>();
+
+    public Teleporter(String name, String description) {
+        super(name, description);
+    }
+
+    public void addRoom(Room room) {
+        roomList.add(room);
+    }
+
+    public Room getRandomExit() {
+        return roomList.get((int) (Math.random() * roomList.size()));
     }
 }

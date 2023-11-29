@@ -26,7 +26,6 @@
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.Scanner;
-import java.util.ArrayList;
 
 public abstract class Item {
     protected String name;
@@ -242,7 +241,7 @@ class HealthPotion extends Item {
         this.count -= count;
     }
 
-    public int getCount() {
+    public int getWeight() {
         return count;
     }
 
@@ -271,6 +270,10 @@ class UpgradeItem extends Item {
         itemtype = "upgradeItem";
     }
 
+    public boolean isOriginalItem(String itemName) {
+        return originalItem.getName().equals(itemName);
+    }
+
     public Item getOriginalItem() {
         return originalItem;
     }
@@ -290,23 +293,32 @@ class UpgradePoint extends Item {
         movable = false;
     }
 
-    public Item use(Item item, ArrayList<Item> inventory) {
-        if (item.getItemtype() != upgradeType) {
-            System.out.println("You can't upgrade that here.");
-            return item;
+    public void use(Command command, Player player) {
+        if (!command.hasThirdWord()) {
+            System.out.println("What are you doing with this.");
+            System.out.println("(hint: include item to be upgraded as third word)");
+            return;
         }
-        for (Item secondItem : inventory) {
-            if (secondItem.getItemtype() == "upgradeItem" && ((UpgradeItem) secondItem).getOriginalItem() == item) {
-                UpgradeItem upgradeItem = (UpgradeItem) secondItem;
-                item = upgradeItem.getReplacementItem();
-                System.out.println(String.format("You upgraded %s into %s.", upgradeItem.getOriginalItem().getName(),
-                        upgradeItem.getReplacementItem().getName()));
-                inventory.remove(upgradeItem);
-                return upgradeItem.getReplacementItem();
+        String originalItemName = command.getThirdWord();
+        for (Item item : player.getInventory()) {
+            if (item.getItemtype() == "upgradeItem" && ((UpgradeItem) item).isOriginalItem(originalItemName)) {
+                Item newItem = ((UpgradeItem) item).getReplacementItem();
+                if (!newItem.getItemtype().equals(upgradeType)) {
+                    System.out.println("You can't upgrade this here.");
+                    return;
+                }
+                Item originalItem = ((UpgradeItem) item).getOriginalItem();
+                player.pickup(newItem);
+                System.out.println(String.format("You upgraded %s into %s.", originalItemName, newItem.getName()));
+                if (newItem.getItemtype() == "weapon" && player.isEquipped((Weapon) originalItem)) {
+                    player.equip((Weapon) newItem);
+                }
+                player.removeItem(originalItem);
+                player.removeItem(item);
+                return;
             }
         }
-        System.out.println("You don't have the necessary item to upgrade this.");
-        return item;
+        System.out.println("You don't have something to upgrade this with.");
     }
 }
 

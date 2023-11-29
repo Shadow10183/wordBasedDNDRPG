@@ -7,6 +7,7 @@ public class Enemy {
     private int damage;
     private boolean hasDrop = false;
     private boolean moving;
+    private Room currentRoom;
     private HashMap<Item, Double> drops = new HashMap<>();
 
     public Enemy(String name, int level, boolean moving) {
@@ -40,6 +41,30 @@ public class Enemy {
 
     public HashMap<Item, Double> getDrops() {
         return drops;
+    }
+
+    public void attack(Player player) {
+        player.takeDamage(damage);
+        System.out.println(String.format("%s does %d damage to you.", name, damage));
+    }
+
+    public Room setRoom(Room room) {
+        currentRoom = room;
+        currentRoom.addEnemy(this);
+        return currentRoom;
+    }
+
+    public void move() {
+        if (!moving) {
+            return;
+        }
+        Room nextRoom = currentRoom.getRandomExit();
+        while ((nextRoom.getName().equals("Throne Room") || nextRoom.getName().equals("Teleporter"))) {
+            nextRoom = currentRoom.getRandomExit();
+        }
+        currentRoom.removeEnemy(this);
+        currentRoom = nextRoom;
+        currentRoom.addEnemy(this);
     }
 
     public void takeDamage(int damage) {
