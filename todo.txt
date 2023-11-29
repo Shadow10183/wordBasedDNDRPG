@@ -1,9 +1,10 @@
-item weight done
-
-pickup/drop player specified amount of consumables done
-
-create special drop backpack: increase storage from 10 to 15 done
-
-(optional) implement spells, books and cast command (cast "spell" "enemy")
-
-add comments to item, game, d20, room(name), parser/commandwords (combat section), enemy, player
+add comments to: (get header comment from Parser)
+    Command
+    CommandWords
+    D20
+    Enemy
+    Game
+    Item
+    Player
+    Room
+    Spell
