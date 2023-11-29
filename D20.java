@@ -22,14 +22,14 @@ public class D20 {
         Printer.println("Rolling the dice!");
         Printer.print("Roll: ");
         int result = 0;
-        int rolls = (int) (Math.random() * 30) + 21;
+        int rolls = (int) (Math.random() * 21) + 10;
         for (int i = 0; i < rolls; i++) {
             result = (int) (Math.random() * 20) + 1;
             System.out.print('\u000C');
             Printer.printLog();
             System.out.print(result);
             try {
-                Thread.sleep(Math.max(100, (i - rolls + 8) * 100));
+                Thread.sleep(Math.max(200, (i - rolls + 9) * 100));
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
