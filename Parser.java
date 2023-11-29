@@ -39,7 +39,7 @@ public class Parser {
         String word2 = null;
         String word3 = null;
 
-        System.out.print("> "); // print prompt
+        Printer.print("> "); // print prompt
 
         inputLine = reader.nextLine();
 

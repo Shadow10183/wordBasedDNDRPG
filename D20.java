@@ -19,12 +19,13 @@ public class D20 {
     }
 
     public int roll() {
-        System.out.println("Rolling the dice!");
+        Printer.println("Rolling the dice!");
         int result = 0;
         int rolls = (int) (Math.random() * 30) + 21;
         for (int i = 0; i < rolls; i++) {
             result = (int) (Math.random() * 20) + 1;
-            System.out.print("\r  \r");
+            System.out.print('\u000C');
+            Printer.printLog();
             System.out.print(result);
             try {
                 Thread.sleep(Math.max(100, (i - rolls + 8) * 100));
