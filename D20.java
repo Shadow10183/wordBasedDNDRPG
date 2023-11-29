@@ -20,6 +20,7 @@ public class D20 {
 
     public int roll() {
         Printer.println("Rolling the dice!");
+        Printer.print("Roll: ");
         int result = 0;
         int rolls = (int) (Math.random() * 30) + 21;
         for (int i = 0; i < rolls; i++) {

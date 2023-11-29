@@ -21,6 +21,10 @@ public class Printer {
         System.out.print(string);
     }
 
+    public static void logln(String string) {
+        log += string + "\n";
+    }
+
     public static void printLog() {
         System.out.print(log);
     }
