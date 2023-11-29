@@ -310,6 +310,7 @@ public class Player {
                             return false;
                         }
                         item.use();
+                        System.out.println(currentRoom.getLongDescription());
                         return false;
                     case "key":
                         Key key = (Key) item;
