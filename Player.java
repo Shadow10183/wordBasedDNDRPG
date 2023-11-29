@@ -583,28 +583,23 @@ public class Player {
             this.level = level;
             switch (level) {
                 case 1:
-                    health = 7;
                     maxHealth = 7;
                     break;
                 case 2:
-                    health = 14;
                     maxHealth = 14;
                     break;
                 case 3:
-                    health = 22;
                     maxHealth = 22;
                     break;
                 case 4:
-                    health = 30;
                     maxHealth = 30;
                     break;
             }
-            System.out.println(String.format("You got stronger!\nLevel increased to %d.\nMax HP increased to %d.",
-                    this.level, maxHealth));
-        } else {
-            mana = maxMana;
-            health = maxHealth;
-            System.out.println("You have recovered your health and mana.");
+            System.out.println("You got stronger!");
+            System.out.println(String.format("Level increased to %d. Max HP increased to %d.", this.level, maxHealth));
         }
+        mana = maxMana;
+        health = maxHealth;
+        System.out.println("You have recovered your health and mana.");
     }
 }
