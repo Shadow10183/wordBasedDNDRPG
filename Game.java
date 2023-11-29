@@ -178,18 +178,18 @@ public class Game {
             Command command = parser.getCommand();
             finished = processCommand(command);
         }
-        System.out.println("Thank you for playing. Good bye.");
+        Printer.println("Thank you for playing. Good bye.");
     }
 
     /**
      * Print out the opening message for the player.
      */
     private void printWelcome() {
-        System.out.println();
-        System.out.println("Welcome to the Castle of Shmorgenyorg!");
-        System.out.println("You are an adventurer tasked with cleansing it of its evils.");
-        System.out.println("Type 'help' if you need help.");
-        System.out.println();
+        Printer.println();
+        Printer.println("Welcome to the Castle of Shmorgenyorg!");
+        Printer.println("You are an adventurer tasked with cleansing it of its evils.");
+        Printer.println("Type 'help' if you need help.");
+        Printer.println();
     }
 
     private void linkCommands() {
@@ -215,7 +215,7 @@ public class Game {
      */
     private boolean processCommand(Command command) {
         if (command.isUnknown()) {
-            System.out.println("I don't know what you mean...");
+            Printer.println("I don't know what you mean...");
             return false;
         }
 
@@ -235,16 +235,16 @@ public class Game {
      */
     private boolean printHelp() {
         if (player.isInCombat()) {
-            System.out.println("You are in the middle of a battle.");
-            System.out.println("Stand strong adventurer, and prevail.");
-            System.out.println();
-            System.out.println("Your command words are:");
+            Printer.println("You are in the middle of a battle.");
+            Printer.println("Stand strong adventurer, and prevail.");
+            Printer.println();
+            Printer.println("Your command words are:");
             parser.showCombatCommands();
         } else {
-            System.out.println("You are lost. You are alone. You wander");
-            System.out.println("around the Castle of Shmorgenyorg.");
-            System.out.println();
-            System.out.println("Your command words are:");
+            Printer.println("You are lost. You are alone. You wander");
+            Printer.println("around the Castle of Shmorgenyorg.");
+            Printer.println();
+            Printer.println("Your command words are:");
             parser.showExplorationCommands();
         }
         return false;
@@ -258,7 +258,7 @@ public class Game {
      */
     private boolean quit(Command command) {
         if (command.hasSecondWord()) {
-            System.out.println("Quit what?");
+            Printer.println("Quit what?");
             return false;
         } else {
             return true; // signal that we want to quit

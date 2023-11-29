@@ -32,45 +32,45 @@ public class Player {
 
     public void setRoom(Room room) {
         currentRoom = room;
-        System.out.println(currentRoom.getLongDescription());
+        Printer.println(currentRoom.getLongDescription());
         path.add(currentRoom);
     }
 
     public Boolean goRoom(Command command) {
         if (inCombat) {
-            System.out.println("You can't do that while in a fight.");
+            Printer.println("You can't do that while in a fight.");
             return false;
         }
         if (detected) {
             System.err.println("You cannot do that until all enemies have been defeated.");
-            System.out.println("If you are not ready, go back.");
+            Printer.println("If you are not ready, go back.");
             return false;
         }
         if (!command.hasSecondWord()) {
             // if there is no second word, we don't know where to go...
-            System.out.println("Where you goin bucko?");
+            Printer.println("Where you goin bucko?");
             return false;
         }
         String direction = command.getSecondWord();
         if (!Room.validDirections.contains(direction)) {
-            System.out.println("Where you goin bucko?");
+            Printer.println("Where you goin bucko?");
             return false;
         }
         // Try to leave current room.
         Room nextRoom = currentRoom.getExit(direction);
         if (nextRoom == null) {
-            System.out.println("You can't phase through a wall like that.");
+            Printer.println("You can't phase through a wall like that.");
             return false;
         } else if (nextRoom.isLocked() == true) {
-            System.out.println("The door is locked. Maybe you should find a key.");
+            Printer.println("The door is locked. Maybe you should find a key.");
             return false;
         } else {
             currentRoom = nextRoom;
             if (currentRoom.getName() == "Teleporter") {
-                System.out.println(currentRoom.getShortDescription());
+                Printer.println(currentRoom.getShortDescription());
                 currentRoom = currentRoom.getRandomExit();
             }
-            System.out.println(currentRoom.getLongDescription());
+            Printer.println(currentRoom.getLongDescription());
             map.updatePointer(currentRoom.getName());
             path.add(currentRoom);
             return true;
@@ -79,34 +79,34 @@ public class Player {
 
     public void goBack() {
         if (inCombat) {
-            System.out.println("You can't do that while in a fight.");
+            Printer.println("You can't do that while in a fight.");
             return;
         }
         if (path.size() <= 1) {
-            System.out.println("There is no path to retrace, go explore.");
+            Printer.println("There is no path to retrace, go explore.");
             return;
         }
         int lastIndex = path.size() - 1;
         currentRoom = path.get(lastIndex - 1);
         path.remove(lastIndex);
-        System.out.println("You have retraced your path.");
+        Printer.println("You have retraced your path.");
         if (currentRoom.hasEnemy()) {
-            System.out.println(currentRoom.getShortDescription());
+            Printer.println(currentRoom.getShortDescription());
             currentRoom.showEnemy();
         } else {
-            System.out.println(currentRoom.getLongDescription());
+            Printer.println(currentRoom.getLongDescription());
         }
         map.updatePointer(currentRoom.getName());
     }
 
     public boolean search() {
         if (inCombat) {
-            System.out.println("You can't do that while in a fight.");
+            Printer.println("You can't do that while in a fight.");
             return false;
         }
         if (detected) {
             System.err.println("You cannot do that until all enemies have been defeated.");
-            System.out.println("If you are not ready, go back.");
+            Printer.println("If you are not ready, go back.");
             return false;
         }
         currentRoom.showItems();
@@ -115,29 +115,29 @@ public class Player {
 
     public boolean pickup(Command command) {
         if (inCombat) {
-            System.out.println("You can't do that while in a fight.");
+            Printer.println("You can't do that while in a fight.");
             return false;
         }
         if (detected) {
             System.err.println("You cannot do that until all enemies have been defeated.");
-            System.out.println("If you are not ready, go back.");
+            Printer.println("If you are not ready, go back.");
             return false;
         }
         if (!command.hasSecondWord()) {
-            System.out.println("What are you picking up bozo?");
+            Printer.println("What are you picking up bozo?");
             return false;
         }
         String itemName = command.getSecondWord();
         for (Item item : currentRoom.getItems()) {
             if (item.getName().equals(itemName)) {
                 if (!item.movable) {
-                    System.out.println("This thing is affixed to the ground, it won't budge.");
+                    Printer.println("This thing is affixed to the ground, it won't budge.");
                     return false;
                 }
                 switch (item.getItemtype()) {
                     case "backpack":
                         maxStorage += 5;
-                        System.out.println("You put on the backpack and increase your storage capacity.");
+                        Printer.println("You put on the backpack and increase your storage capacity.");
                         break;
                     case "healthPotion":
                         HealthPotion healthPotion = (HealthPotion) item;
@@ -151,7 +151,7 @@ public class Player {
                             }
                         }
                         if (storage + count > maxStorage) {
-                            System.out.println("You are too heavy to pick this up. Lose weight.");
+                            Printer.println("You are too heavy to pick this up. Lose weight.");
                             return false;
                         }
                         storage += count;
@@ -166,7 +166,7 @@ public class Player {
                         if (!itemfound) {
                             inventory.add(new HealthPotion(count));
                         }
-                        System.out.println(
+                        Printer.println(
                                 String.format("You picked up %sx%d and put it in your inventory.",
                                         healthPotion.getName(), count));
                         if (count != healthPotion.getWeight()) {
@@ -176,34 +176,34 @@ public class Player {
                         break;
                     default:
                         if (item.getWeight() + storage > maxStorage) {
-                            System.out.println("You are too heavy to pick this up. Lose weight.");
+                            Printer.println("You are too heavy to pick this up. Lose weight.");
                             return false;
                         }
                         storage += item.getWeight();
                         inventory.add(item);
-                        System.out.println(
+                        Printer.println(
                                 String.format("You picked up the %s and put it in your inventory.", item.getName()));
                 }
                 currentRoom.removeItem(item);
                 return false;
             }
         }
-        System.out.println("What were you trying to pick up... the air?");
+        Printer.println("What were you trying to pick up... the air?");
         return false;
     }
 
     public boolean drop(Command command) {
         if (inCombat) {
-            System.out.println("You can't do that while in a fight.");
+            Printer.println("You can't do that while in a fight.");
             return false;
         }
         if (detected) {
             System.err.println("You cannot do that until all enemies have been defeated.");
-            System.out.println("If you are not ready, go back.");
+            Printer.println("If you are not ready, go back.");
             return false;
         }
         if (!command.hasSecondWord()) {
-            System.out.println("What are you dropping bozo?");
+            Printer.println("What are you dropping bozo?");
             return false;
         }
         String itemName = command.getSecondWord();
@@ -232,7 +232,7 @@ public class Player {
                         if (!itemfound) {
                             currentRoom.addItem(new HealthPotion(count));
                         }
-                        System.out.println(
+                        Printer.println(
                                 String.format("You dropped %sx%d ", healthPotion.getName(),
                                         (Math.min(count, healthPotion.getWeight()))));
                         if (count != healthPotion.getWeight()) {
@@ -243,54 +243,54 @@ public class Player {
                         break;
                     default:
                         if (item == equippedweapon) {
-                            System.out.println("You can't drop something that is currently equipped.");
+                            Printer.println("You can't drop something that is currently equipped.");
                             return false;
                         }
                         currentRoom.addItem(item);
-                        System.out.println(String.format("You dropped %s.", itemName));
+                        Printer.println(String.format("You dropped %s.", itemName));
                 }
                 inventory.remove(item);
                 storage -= item.getWeight();
                 return false;
             }
         }
-        System.out.println("What are you trying to drop.");
+        Printer.println("What are you trying to drop.");
         return false;
     }
 
     public boolean showInventory(Command command) {
         if (!command.hasSecondWord()) {
             if (inventory.size() == 0) {
-                System.out.println("You have no items in inventory.");
+                Printer.println("You have no items in inventory.");
             } else {
-                System.out.println(
+                Printer.println(
                         String.format("Your inventory contains: [%d/%d]", storage, maxStorage));
                 for (Item item : inventory) {
                     if (item.getItemtype() != "healthPotion") {
-                        System.out.print(item.getName() + " ");
+                        Printer.print(item.getName() + " ");
                     } else {
-                        System.out.print(item.getName() + String.format("x%d ", ((HealthPotion) item).getWeight()));
+                        Printer.print(item.getName() + String.format("x%d ", ((HealthPotion) item).getWeight()));
                     }
                 }
-                System.out.println();
+                Printer.println();
             }
             return false;
         }
         String itemName = command.getSecondWord();
         for (Item item : inventory) {
             if (item.getName().equals(itemName)) {
-                System.out.println(item.getDescription());
+                Printer.println(item.getDescription());
                 return false;
             }
         }
-        System.out.println("You don't have that item.");
+        Printer.println("You don't have that item.");
         return false;
     }
 
     public boolean use(Command command) {
         if (!command.hasSecondWord()) {
-            System.out.println("You can't just produce something out of thin air.");
-            System.out.println("Use something you actually have.");
+            Printer.println("You can't just produce something out of thin air.");
+            Printer.println("Use something you actually have.");
             return false;
         }
         String itemName = command.getSecondWord();
@@ -306,11 +306,11 @@ public class Player {
                 switch (item.getItemtype()) {
                     case "map":
                         if (inCombat) {
-                            System.out.println("Why are you trying to use a map when you are getting killed.");
+                            Printer.println("Why are you trying to use a map when you are getting killed.");
                             return false;
                         }
                         item.use();
-                        System.out.println(currentRoom.getLongDescription());
+                        Printer.println(currentRoom.getLongDescription());
                         return false;
                     case "key":
                         Key key = (Key) item;
@@ -319,11 +319,11 @@ public class Player {
                                 key.use();
                                 map.unlock(room.getName());
                                 inventory.remove(item);
-                                System.out.println(currentRoom.getLongDescription());
+                                Printer.println(currentRoom.getLongDescription());
                                 return false;
                             }
                         }
-                        System.out.println("You can't use this here.");
+                        Printer.println("You can't use this here.");
                         return false;
                     case "book":
                         Book book = (Book) item;
@@ -338,47 +338,47 @@ public class Player {
                         if (inCombat) {
                             if (mana < maxMana) {
                                 mana += 1;
-                                System.out.println(String.format("Current mana: %d/%d", mana, maxMana));
+                                Printer.println(String.format("Current mana: %d/%d", mana, maxMana));
                             }
                             attackResult();
                         }
                         storage -= 1;
                         return false;
                     default:
-                        System.out.println("You can't use this here.");
+                        Printer.println("You can't use this here.");
                         return false;
                 }
             }
         }
-        System.out.println("You can't use what you don't have.");
+        Printer.println("You can't use what you don't have.");
         return false;
     }
 
     public boolean equip(Command command) {
         if (!command.hasSecondWord()) {
-            System.out.println(String.format("Your current weapon is/are %s.", equippedweapon.getName()));
-            System.out.println(equippedweapon.getDescription());
+            Printer.println(String.format("Your current weapon is/are %s.", equippedweapon.getName()));
+            Printer.println(equippedweapon.getDescription());
             return false;
         }
         String itemName = command.getSecondWord();
         for (Item item : inventory) {
             if (item.getName().equals(itemName)) {
                 if (item.getItemtype() != "weapon") {
-                    System.out.println("You can't equip that as a weapon.");
+                    Printer.println("You can't equip that as a weapon.");
                     return false;
                 }
                 equippedweapon = (Weapon) item;
-                System.out.println(itemName + " has been equipped.");
+                Printer.println(itemName + " has been equipped.");
                 return false;
             }
         }
-        System.out.println("You can't equip what you don't have.");
+        Printer.println("You can't equip what you don't have.");
         return false;
     }
 
     public Enemy attack(Command command) {
         if (!command.hasSecondWord() && currentEnemy == null) {
-            System.out.println("Attack what?");
+            Printer.println("Attack what?");
             return null;
         }
         String enemyName = command.getSecondWord();
@@ -389,10 +389,10 @@ public class Player {
         }
         if (!inCombat) {
             if (currentEnemy == null) {
-                System.out.println("That enemy doesn't exist.");
+                Printer.println("That enemy doesn't exist.");
                 return null;
             }
-            System.out.println(String.format("You enter in a fight with %s.",
+            Printer.println(String.format("You enter in a fight with %s.",
                     currentEnemy.getName()));
             inCombat = true;
             return null;
@@ -400,7 +400,7 @@ public class Player {
             equippedweapon.attack(currentEnemy);
             if (mana < maxMana) {
                 mana += 1;
-                System.out.println(String.format("Current mana: %d/%d", mana, maxMana));
+                Printer.println(String.format("Current mana: %d/%d", mana, maxMana));
             }
             return attackResult();
         }
@@ -408,7 +408,7 @@ public class Player {
 
     public Enemy cast(Command command) {
         if (!inCombat) {
-            System.out.println("You can only do that in a fight.");
+            Printer.println("You can only do that in a fight.");
             return null;
         }
         if (!command.hasSecondWord()) {
@@ -417,15 +417,15 @@ public class Player {
                 allSpells += spell.getName() + " ";
             }
             if (allSpells == "") {
-                System.out.println("You haven't learnt any spells.");
+                Printer.println("You haven't learnt any spells.");
                 return null;
             }
-            System.out.println("The spells you have learnt are:\n" + allSpells);
+            Printer.println("The spells you have learnt are:\n" + allSpells);
             return null;
         }
         String spellName = command.getSecondWord();
         if (spells.size() == 0) {
-            System.out.println("You haven't learnt any spells.");
+            Printer.println("You haven't learnt any spells.");
             return null;
         }
         for (Spell spell : spells) {
@@ -433,16 +433,16 @@ public class Player {
                 if (mana >= spell.getManaCost()) {
                     spell.attack(currentEnemy);
                     mana -= spell.getManaCost();
-                    System.out.println(String.format("It consumed %d mana. Current mana: %d/%d", spell.getManaCost(),
+                    Printer.println(String.format("It consumed %d mana. Current mana: %d/%d", spell.getManaCost(),
                             mana, maxMana));
                     return attackResult();
                 } else {
-                    System.out.println("You don't have enough mana.");
+                    Printer.println("You don't have enough mana.");
                     return null;
                 }
             }
         }
-        System.out.println("You haven't learnt this spell.");
+        Printer.println("You haven't learnt this spell.");
         return null;
     }
 
@@ -491,10 +491,10 @@ public class Player {
         if (currentEnemy.getHealth() <= 0) {
             Enemy slainEnemy = currentEnemy;
             currentEnemy = null;
-            System.out.println(String.format("You have defeated the %s.", slainEnemy.getName()));
+            Printer.println(String.format("You have defeated the %s.", slainEnemy.getName()));
             inCombat = false;
             if (slainEnemy.getName() == "Dragon") {
-                System.out.println("Congratulations! You have ridded this castle of its infestations.");
+                Printer.println("Congratulations! You have ridded this castle of its infestations.");
                 dead = true;
                 return null;
             }
@@ -531,7 +531,7 @@ public class Player {
                     }
                 }
                 if (dropresult != "") {
-                    System.out.println("It dropped\n" + dropresult);
+                    Printer.println("It dropped\n" + dropresult);
                 }
             }
             currentRoom.removeEnemy(slainEnemy);
@@ -545,11 +545,11 @@ public class Player {
         }
         currentEnemy.attack(this);
         if (health <= 0) {
-            System.out.println("You got yourself killed, do better.");
+            Printer.println("You got yourself killed, do better.");
             dead = true;
             return null;
         }
-        System.out.println(String.format("Your HP: %d/%d \t%s HP: %d", health, maxHealth, currentEnemy.getName(),
+        Printer.println(String.format("Your HP: %d/%d \t%s HP: %d", health, maxHealth, currentEnemy.getName(),
                 currentEnemy.getHealth()));
         return null;
     }
@@ -596,11 +596,11 @@ public class Player {
                     maxHealth = 30;
                     break;
             }
-            System.out.println("You got stronger!");
-            System.out.println(String.format("Level increased to %d. Max HP increased to %d.", this.level, maxHealth));
+            Printer.println("You got stronger!");
+            Printer.println(String.format("Level increased to %d. Max HP increased to %d.", this.level, maxHealth));
         }
         mana = maxMana;
         health = maxHealth;
-        System.out.println("You have recovered your health and mana.");
+        Printer.println("You have recovered your health and mana.");
     }
 }

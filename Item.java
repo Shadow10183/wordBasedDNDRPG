@@ -41,7 +41,7 @@ public abstract class Item {
     }
 
     public void use() {
-        System.out.println("You can't use this here.");
+        Printer.println("You can't use this here.");
     }
 
     public String getName() {
@@ -78,7 +78,7 @@ class Key extends Item {
 
     public void use() {
         getUnlock().unlock();
-        System.out.println("A room has been unlocked.");
+        Printer.println("A room has been unlocked.");
     }
 
     public Room getUnlock() {
@@ -103,7 +103,7 @@ class Weapon extends Item {
         D20 dice = new D20();
         int turnDamage = (int) Math.round((damage * (0.5 + ((double) dice.roll() / 20))));
         enemy.takeDamage(turnDamage);
-        System.out.println(String.format(
+        Printer.println(String.format(
                 "You attack %s with %s, it did %d damage.", enemy.getName(), name, turnDamage));
     }
 }
@@ -119,7 +119,7 @@ class Book extends Item {
 
     public void use(Player player) {
         player.addSpell(spell);
-        System.out.println("You learned a new spell: " + spell.getName());
+        Printer.println("You learned a new spell: " + spell.getName());
     }
 }
 
@@ -187,7 +187,7 @@ class Gamemap extends Item {
     }
 
     public void use() {
-        System.out.println("You pull out your map.\n" + blurMap);
+        Printer.println("You pull out your map.\n" + blurMap);
     }
 
     public void updatePointer(String roomname) {
@@ -251,11 +251,11 @@ class HealthPotion extends Item {
 
     public int use(Player player) {
         int potency = (int) Math.ceil((double) player.getMaxHealth() / 2);
-        System.out.println(potency);
+        Printer.println(potency);
         int health = Math.min(potency, player.getMaxHealth() - player.getHealth());
         player.heal(health);
         count -= 1;
-        System.out.println(String.format("You recovered %d hp, current hp: %d/%d", health, player.getHealth(),
+        Printer.println(String.format("You recovered %d hp, current hp: %d/%d", health, player.getHealth(),
                 player.getMaxHealth()));
         return count;
     }
@@ -297,8 +297,8 @@ class UpgradePoint extends Item {
 
     public void use(Command command, Player player) {
         if (!command.hasThirdWord()) {
-            System.out.println("What are you doing with this.");
-            System.out.println("(hint: include item to be upgraded as third word)");
+            Printer.println("What are you doing with this.");
+            Printer.println("(hint: include item to be upgraded as third word)");
             return;
         }
         String originalItemName = command.getThirdWord();
@@ -306,12 +306,12 @@ class UpgradePoint extends Item {
             if (item.getItemtype() == "upgradeItem" && ((UpgradeItem) item).isOriginalItem(originalItemName)) {
                 Item newItem = ((UpgradeItem) item).getReplacementItem();
                 if (!newItem.getItemtype().equals(upgradeType)) {
-                    System.out.println("You can't upgrade this here.");
+                    Printer.println("You can't upgrade this here.");
                     return;
                 }
                 Item originalItem = ((UpgradeItem) item).getOriginalItem();
                 player.pickup(newItem);
-                System.out.println(String.format("You upgraded %s into %s.", originalItemName, newItem.getName()));
+                Printer.println(String.format("You upgraded %s into %s.", originalItemName, newItem.getName()));
                 if (newItem.getItemtype() == "weapon" && player.isEquipped((Weapon) originalItem)) {
                     player.equip((Weapon) newItem);
                 }
@@ -320,7 +320,7 @@ class UpgradePoint extends Item {
                 return;
             }
         }
-        System.out.println("You don't have something to upgrade this with.");
+        Printer.println("You don't have something to upgrade this with.");
     }
 }
 

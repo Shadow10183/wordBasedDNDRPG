@@ -45,7 +45,7 @@ public class Enemy {
 
     public void attack(Player player) {
         player.takeDamage(damage);
-        System.out.println(String.format("%s does %d damage to you.", name, damage));
+        Printer.println(String.format("%s does %d damage to you.", name, damage));
     }
 
     public Room setRoom(Room room) {

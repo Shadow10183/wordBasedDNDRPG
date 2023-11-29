@@ -184,7 +184,7 @@ public class Room {
     public void showEnemy() {
         if (hasEnemy()) {
             for (Enemy enemy : enemies) {
-                System.out.println(String.format("A(n) %s sizes you up.", enemy.getName()));
+                Printer.println(String.format("A(n) %s sizes you up.", enemy.getName()));
             }
         }
     }
@@ -198,7 +198,7 @@ public class Room {
     }
 
     public void showItems() {
-        System.out.println("You search the room and find");
+        Printer.println("You search the room and find");
         String result = "";
         for (Item item : items) {
             if (item.getItemtype() != "healthPotion") {
@@ -208,9 +208,9 @@ public class Room {
             }
         }
         if (result == "") {
-            System.out.println("nothing. There is nothing but the void here...");
+            Printer.println("nothing. There is nothing but the void here...");
         } else {
-            System.out.println(result);
+            Printer.println(result);
         }
     }
 
