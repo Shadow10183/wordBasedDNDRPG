@@ -250,7 +250,9 @@ class HealthPotion extends Item {
     }
 
     public int use(Player player) {
-        int health = Math.min(Math.ceilDiv(player.getMaxHealth(), 2), player.getMaxHealth() - player.getHealth());
+        int potency = (int) Math.ceil((double) player.getMaxHealth() / 2);
+        System.out.println(potency);
+        int health = Math.min(potency, player.getMaxHealth() - player.getHealth());
         player.heal(health);
         count -= 1;
         System.out.println(String.format("You recovered %d hp, current hp: %d/%d", health, player.getHealth(),
