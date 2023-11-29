@@ -119,16 +119,13 @@ public class Game {
         eastPier.addItem(healthPotionx2);
         westPier.addItem(healthPotionx3);
         armoury.addItem(anvil);
-        // library.addItem(lightningBook);
+        library.addItem(lightningBook);
         player.pickup(map);
-
-        player.pickup(lightningBook);
-        player.pickup(fireballBook);
 
         // add enemy drops
         mimic.addDrop(backpack, 1);
         geoguy.addDrop(sharpeningStone, 1);
-        // goblin.addDrop(fireballBook, 1);
+        goblin.addDrop(fireballBook, 1);
 
         // initialise room exits
         spawn.setExit("east", eastPier);
@@ -189,8 +186,8 @@ public class Game {
      */
     private void printWelcome() {
         System.out.println();
-        System.out.println("Welcome to the World of Zuul!");
-        System.out.println("World of Zuul is a new, incredibly exciting adventure game.");
+        System.out.println("Welcome to the Castle of Shmorgenyorg!");
+        System.out.println("You are an adventurer tasked with cleansing it of its evils.");
         System.out.println("Type 'help' if you need help.");
         System.out.println();
     }
