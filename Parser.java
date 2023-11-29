@@ -13,7 +13,7 @@
  * returns a command object that is marked as an unknown command.
  * 
  * @author Aidan Leung Yau Hei, Michael Kölling and David J. Barnes
- * @version 2016.02.29
+ * @version 2023.11.30
  */
 
 import java.util.Scanner;
@@ -67,12 +67,15 @@ public class Parser {
     }
 
     /**
-     * Print out a list of valid command words.
+     * Print out a list of valid command words during exploration.
      */
     public void showExplorationCommands() {
         commands.showExploration();
     }
 
+    /**
+     * Print out a list of valid command words during combat.
+     */
     public void showCombatCommands() {
         commands.showCombat();
     }
