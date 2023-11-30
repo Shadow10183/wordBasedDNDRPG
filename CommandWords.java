@@ -43,19 +43,19 @@ public class CommandWords {
     }
 
     /**
-     * Print all valid commands to Printer.
+     * Print all valid commands to System.out.
      */
     public void showExploration() {
         for (String command : validExplorationCommands) {
-            Printer.print(command + "  ");
+            System.out.print(command + "  ");
         }
-        Printer.println();
+        System.out.println();
     }
 
     public void showCombat() {
         for (String command : validCombatCommands) {
-            Printer.print(command + "  ");
+            System.out.print(command + "  ");
         }
-        Printer.println();
+        System.out.println();
     }
 }

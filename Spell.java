@@ -13,7 +13,7 @@ class Spell {
         D20 dice = new D20();
         int turnDamage = (int) Math.round((damage * (0.5 + ((double) dice.roll() / 20))));
         enemy.takeDamage(turnDamage);
-        Printer.println(String.format(
+        System.out.println(String.format(
                 "You cast %s at %s, it did %d damage.", name, enemy.getName(), turnDamage));
     }
 
