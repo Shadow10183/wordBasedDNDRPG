@@ -1,6 +1,6 @@
 /**
- * This class is part of the "World of Zuul" application.
- * "World of Zuul" is a very simple, text based adventure game.
+ * This class is part of the "Castle of Shmorgenyorg" application.
+ * "Castle of Shmorgenyorg" is a very simple, text based adventure game.
  *
  * This class holds information about a command that was issued by the user.
  * A command currently consists of two strings: a command word and a second
@@ -13,8 +13,8 @@
  *
  * If the command had only one word, then the second word is <null>.
  * 
- * @author Aidan Leung Yau Hei, Michael Kölling and David J. Barnes
- * @version 2016.02.29
+ * @author Aidan Leung Yau Hei (k23093432), Michael Kölling and David J. Barnes
+ * @version 2023.11.30
  */
 
 public class Command {
@@ -23,8 +23,8 @@ public class Command {
     private String thirdWord;
 
     /**
-     * Create a command object. First and second word must be supplied, but
-     * either one (or both) can be null.
+     * Create a command object. First, second and third words must be supplied, but
+     * any one (or all) can be null.
      * 
      * @param firstWord  The first word of the command. Null if the command was not
      *                   recognised.

@@ -2,25 +2,17 @@
 /**
  * Class Item - an item in an adventure game.
  *
- * This class is part of the "World of Zuul" application.
- * "World of Zuul" is a very simple, text based adventure game.
+ * This class is part of the "Castle of Shmorgenyorg" application.
+ * "Castle of Shmorgenyorg" is a very simple, text based adventure game.
  *
  * An "Item" is an object that is either placed in a room, carried by an enemy
  * or the player.
  * Items can be used to interact with other elements in the game.
- * The "Item" class has children classes "Key", "Weapon", "Book" and
- * "HealPotion".
+ * The "Item" class has children classes "Key", "Weapon", "Book", "Gamemap",
+ * "HealPotion", "UpgradeItem", "UpgradePoint" and "Backpack".
  * 
- * A "Key" is used to unlock certain locked doors.
- * 
- * A "Weapon" is used to perform a melee attack on an enemy.
- * 
- * A "Book" is used to unlock new spells.
- * 
- * A "HealPotion" is used to restore a set amount of hp to the player.
- * 
- * @author Aidan Leung Yau Hei
- * @version 2016.02.29
+ * @author Aidan Leung Yau Hei (k23093432)
+ * @version 2023.11.30
  */
 
 import java.util.HashMap;
@@ -28,47 +20,80 @@ import java.util.Map.Entry;
 import java.util.Scanner;
 
 public abstract class Item {
-    protected String name;
-    protected String itemtype;
-    protected String description;
-    protected int weight;
-    protected boolean movable = true;
+    protected String name; // name of the item
+    protected String itemtype; // type of the item
+    protected String description; // description of the item
+    protected int weight; // weight of the item
+    protected boolean movable = true; // whether it can be moved
 
+    /**
+     * Creates a new Item and initializes the properties
+     * 
+     * @param name
+     * @param description
+     * @param weight
+     */
     public Item(String name, String description, int weight) {
         this.name = name;
         this.description = description;
         this.weight = weight;
     }
 
+    /**
+     * By default the item cannot be used.
+     */
     public void use() {
         System.out.println("You can't use this here.");
     }
 
+    /**
+     * @return the name of the item
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * @return a concatenated string of the description and weight of the item
+     */
     public String getDescription() {
         return description + " Weight: " + weight;
     }
 
+    /**
+     * @return the type of the item
+     */
     public String getItemtype() {
         return itemtype;
     }
 
+    /**
+     * @return the weight of the item as integer
+     */
     public int getWeight() {
         return weight;
     }
 
+    /**
+     * @return whether the item can be moved
+     */
     public Boolean getMovable() {
         return movable;
     }
 }
 
 class Key extends Item {
-    private Room roomUnlock;
-    private String direction;
+    private Room roomUnlock; // the room it unlocks
+    private String direction; // the direction of the locked door
 
+    /**
+     * Creates a key that is used to unlock a specified room
+     * 
+     * @param name
+     * @param description
+     * @param room
+     * @param leadingdirection
+     */
     public Key(String name, String description, Room room, String leadingdirection) {
         super(name, description, 0);
         itemtype = "key";
@@ -76,17 +101,20 @@ class Key extends Item {
         direction = leadingdirection;
     }
 
-    public void use() {
-        getUnlock().unlock();
-        System.out.println("A room has been unlocked.");
-    }
-
-    public Room getUnlock() {
-        return roomUnlock;
-    }
-
-    public String getDirection() {
-        return direction;
+    /**
+     * Overrides the parent method and unlocks a specific room.
+     * Outputs a message notifying user that it unlocked a room.
+     * 
+     * @param room
+     * @return true if room was unlocked, false otherwise
+     */
+    public boolean use(Room room) {
+        if (room == roomUnlock) {
+            roomUnlock.unlock();
+            System.out.println("A room has been unlocked.");
+            return true;
+        }
+        return false;
     }
 }
 

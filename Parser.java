@@ -1,7 +1,7 @@
 
 /**
- * This class is part of the "World of Zuul" application.
- * "World of Zuul" is a very simple, text based adventure game.
+ * This class is part of the "Castle of Schmorgenyorg" application.
+ * "Castle of Schmorgenyorg" is a very simple, text based adventure game.
  * 
  * This parser reads user input and tries to interpret it as an "Adventure"
  * command. Every time it is called it reads a line from the terminal and
@@ -12,7 +12,7 @@
  * the known commands, and if the input is not one of the known commands, it
  * returns a command object that is marked as an unknown command.
  * 
- * @author Aidan Leung Yau Hei, Michael Kölling and David J. Barnes
+ * @author Aidan Leung Yau Hei (k23093432), Michael Kölling and David J. Barnes
  * @version 2023.11.30
  */
 

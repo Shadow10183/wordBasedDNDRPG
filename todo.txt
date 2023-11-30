@@ -1,10 +1,7 @@
 add comments to: (get header comment from Parser)
-    Command
-    CommandWords
-    D20
-    Enemy
-    Game
-    Item
+    Item (after key)
     Player
     Room
     Spell
+
+remove main from Game

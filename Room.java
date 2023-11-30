@@ -9,8 +9,8 @@
  * connected to other rooms via exits. For each existing exit, the room
  * stores a reference to the neighboring room.
  * 
- * @author Aidan Leung Yau Hei, Michael Kölling and David J. Barnes
- * @version 2016.02.29
+ * @author Aidan Leung Yau Hei (k23093432), Michael Kölling and David J. Barnes
+ * @version 2023.11.30
  */
 
 import java.util.Set;
@@ -222,8 +222,8 @@ public class Room {
 class Teleporter extends Room {
     private ArrayList<Room> roomList = new ArrayList<>();
 
-    public Teleporter(String name, String description) {
-        super(name, description);
+    public Teleporter(String description) {
+        super("Teleporter", description);
     }
 
     public void addRoom(Room room) {

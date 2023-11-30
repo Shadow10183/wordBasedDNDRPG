@@ -1,23 +1,33 @@
 /**
- * Class D20 - a dice in an adventure game.
+ * This class is part of the "Castle of Shmorgenyorg" application.
+ * "Castle of Shmorgenyorg" is a very simple, text based adventure game.
  *
- * This class is part of the "World of Zuul" application.
- * "World of Zuul" is a very simple, text based adventure game.
- *
- * A "D20" simulates a dice with 20 sides, the outcome of the diceroll affects
- * the effectiveness of actions.
+ * This class simulates a dice with 20 sides, the outcome of the diceroll
+ * affects the effectiveness of actions.
  * 
  * e.g. Dice roll on attack, a roll of 20 will multiply damage by 1.5 while a
- * roll of 1 will half the damage.
+ * roll of 1 will multiply damage by 0.5.
+ * i.e. weapon of base damage 10 will do 15 or 5 respectively.
  * 
- * @author Aidan Leung Yau Hei
- * @version 2016.02.29
+ * @author Aidan Leung Yau Hei (k23093432)
+ * @version 2023.11.30
  */
+
 public class D20 {
+    /**
+     * Constructor - initialise the D20 dice.
+     */
     public D20() {
         // do nothing
     }
 
+    /**
+     * Simulates the rolling of a dice, displays numbers as it 'rolls'
+     * with a small delay in between, increasing towards the final rolls.
+     * Used to introduce chaos to combat gameplay.
+     * 
+     * @return the value of the final dice roll.
+     */
     public int roll() {
         System.out.println("Rolling the dice!");
         int result = 0;

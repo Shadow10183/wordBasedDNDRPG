@@ -36,7 +36,7 @@ public class Player {
         path.add(currentRoom);
     }
 
-    public Boolean goRoom(Command command) {
+    public boolean goRoom(Command command) {
         if (inCombat) {
             System.out.println("You can't do that while in a fight.");
             return false;
@@ -73,18 +73,19 @@ public class Player {
             System.out.println(currentRoom.getLongDescription());
             map.updatePointer(currentRoom.getName());
             path.add(currentRoom);
+            checkEnemy();
             return true;
         }
     }
 
-    public void goBack() {
+    public boolean goBack() {
         if (inCombat) {
             System.out.println("You can't do that while in a fight.");
-            return;
+            return false;
         }
         if (path.size() <= 1) {
             System.out.println("There is no path to retrace, go explore.");
-            return;
+            return false;
         }
         int lastIndex = path.size() - 1;
         currentRoom = path.get(lastIndex - 1);
@@ -97,6 +98,8 @@ public class Player {
             System.out.println(currentRoom.getLongDescription());
         }
         map.updatePointer(currentRoom.getName());
+        checkEnemy();
+        return true;
     }
 
     public boolean search() {
@@ -315,8 +318,7 @@ public class Player {
                     case "key":
                         Key key = (Key) item;
                         for (Room room : currentRoom.getAllExits()) {
-                            if (room == key.getUnlock()) {
-                                key.use();
+                            if (key.use(room)) {
                                 map.unlock(room.getName());
                                 inventory.remove(item);
                                 System.out.println(currentRoom.getLongDescription());
