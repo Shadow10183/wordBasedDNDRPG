@@ -19,22 +19,27 @@ public class D20 {
     }
 
     public int roll() {
-        Printer.println("Rolling the dice!");
-        Printer.print("Roll: ");
+        System.out.println("Rolling the dice!");
         int result = 0;
-        int rolls = (int) (Math.random() * 21) + 10;
+        int rolls = (int) (Math.random() * 3) + 6;
         for (int i = 0; i < rolls; i++) {
-            result = (int) (Math.random() * 20) + 1;
-            System.out.print('\u000C');
-            Printer.printLog();
-            System.out.print(result);
             try {
-                Thread.sleep(Math.max(200, (i - rolls + 9) * 100));
+                Thread.sleep(Math.max(200, (i - rolls + 5) * 200));
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
+            result = (int) (Math.random() * 20) + 1;
+            if (i != 0) {
+                System.out.print("->");
+            }
+            System.out.print(result);
         }
-        System.out.println();
+        try {
+            Thread.sleep(200);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        System.out.println("\nResult: " + result);
         return result;
     }
 }
