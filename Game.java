@@ -118,8 +118,8 @@ public class Game {
         Item map, blackHallKey, throneRoomKey, stick, butterKnife, rustySword, honedSword, healthPotionx2,
                 healthPotionx3, anvil, sharpeningStone, backpack, fireballBook, lightningBook;
         map = new Gamemap("map", "Gives you a bird's eye view.");
-        blackHallKey = new Key("blackHallKey", "Unlocks the way to Black Hall.", blackHall, "north");
-        throneRoomKey = new Key("throneRoomKey", "Unlocks the way to the Throne Room.", throneRoom, "north");
+        blackHallKey = new Key("blackHallKey", "Unlocks the way to Black Hall.", blackHall);
+        throneRoomKey = new Key("throneRoomKey", "Unlocks the way to the Throne Room.", throneRoom);
         stick = new Weapon("stick", "Cool pointy stick you found.", 2, 2);
         butterKnife = new Weapon("butterKnife", "A common utensil with an uncommonly sharp edge.", 3, 4);
         rustySword = new Weapon("rustySword", "This must've been discarded for quite some time.", 5, 5);

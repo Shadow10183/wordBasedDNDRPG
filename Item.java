@@ -84,7 +84,6 @@ public abstract class Item {
 
 class Key extends Item {
     private Room roomUnlock; // the room it unlocks
-    private String direction; // the direction of the locked door
 
     /**
      * Creates a key that is used to unlock a specified room
@@ -92,13 +91,11 @@ class Key extends Item {
      * @param name
      * @param description
      * @param room
-     * @param leadingdirection
      */
-    public Key(String name, String description, Room room, String leadingdirection) {
+    public Key(String name, String description, Room room) {
         super(name, description, 0);
         itemtype = "key";
         roomUnlock = room;
-        direction = leadingdirection;
     }
 
     /**
