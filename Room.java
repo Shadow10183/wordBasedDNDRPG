@@ -2,8 +2,8 @@
 /**
  * Class Room - a room in an adventure game.
  *
- * This class is part of the "World of Zuul" application.
- * "World of Zuul" is a very simple, text based adventure game.
+ * This class is part of the "Castle of Shmorgenyorg" application.
+ * "Castle of Shmorgenyorg" is a very simple, text based adventure game.
  *
  * A "Room" represents one location in the scenery of the game. It is
  * connected to other rooms via exits. For each existing exit, the room
@@ -15,9 +15,9 @@
 
 import java.util.Set;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Room {
     public static final List<String> validDirections = Arrays.asList("east", "southeast", "south", "southwest", "west",
@@ -159,14 +159,30 @@ public class Room {
         return exits.get(direction);
     }
 
+    /**
+     * Adds an enemy to the room and adjusts the arraylist accordingly.
+     * Used when an enemy is set to be in the room
+     * or moves into the room by themselves.
+     * 
+     * @param enemy
+     */
     public void addEnemy(Enemy enemy) {
         enemies.add(enemy);
     }
 
+    /**
+     * Removes an enemy from the room and adjusts the arraylist accordingly.
+     * Used when an enemy dies or moves to another room.
+     * 
+     * @param enemy
+     */
     public void removeEnemy(Enemy enemy) {
         enemies.remove(enemy);
     }
 
+    /**
+     * @return a list of all enemies in the room.
+     */
     public ArrayList<Enemy> getEnemies() {
         return enemies;
     }
@@ -181,6 +197,9 @@ public class Room {
         return true;
     }
 
+    /**
+     * If there are enemies in the room, prints a message notifying the user.
+     */
     public void showEnemy() {
         if (hasEnemy()) {
             for (Enemy enemy : enemies) {
@@ -189,14 +208,30 @@ public class Room {
         }
     }
 
+    /**
+     * Adds an item to the room and adjusts the arraylist accordingly.
+     * Used when an item is set or dropped into the room.
+     * 
+     * @param item
+     */
     public void addItem(Item item) {
         items.add(item);
     }
 
+    /**
+     * Removes an item from the room and adjusts the arraylist accordingly.
+     * Used when the user picks it up from the room.
+     * 
+     * @param item
+     */
     public void removeItem(Item item) {
         items.remove(item);
     }
 
+    /**
+     * If there are items in the room, a message will be printed to show them all.
+     * Otherwise the message will notify user that there are no items.
+     */
     public void showItems() {
         System.out.println("You search the room and find");
         String result = "";
@@ -214,22 +249,39 @@ public class Room {
         }
     }
 
+    /**
+     * @return a list of all items in the room.
+     */
     public ArrayList<Item> getItems() {
         return items;
     }
 }
 
 class Teleporter extends Room {
+    // A list of all rooms that the player can be teleported to.
     private ArrayList<Room> roomList = new ArrayList<>();
 
+    /**
+     * Initialises the teleporter as a room and sets its name and description.
+     * 
+     * @param description
+     */
     public Teleporter(String description) {
         super("Teleporter", description);
     }
 
+    /**
+     * Adds a room that the player can be teleported to.
+     * 
+     * @param room
+     */
     public void addRoom(Room room) {
         roomList.add(room);
     }
 
+    /**
+     * @return a room that the player will be teleported to that is randomly chosen.
+     */
     public Room getRandomExit() {
         return roomList.get((int) (Math.random() * roomList.size()));
     }

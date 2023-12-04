@@ -116,14 +116,28 @@ class Key extends Item {
 }
 
 class Weapon extends Item {
-    private int damage;
+    private int damage; // base damage of the weapon
 
+    /**
+     * Creates a new weapon and sets its item type to weapon.
+     * 
+     * @param name
+     * @param description
+     * @param weight
+     * @param damage
+     */
     public Weapon(String name, String description, int weight, int damage) {
         super(name, description, weight);
         itemtype = "weapon";
         this.damage = damage;
     }
 
+    /**
+     * Deals damage to the given enemy.
+     * The damage dealt is based on the result of the dice roll.
+     * 
+     * @param enemy
+     */
     public void attack(Enemy enemy) {
         D20 dice = new D20();
         int turnDamage = (int) Math.round((damage * (0.5 + ((double) dice.roll() / 20))));
@@ -134,14 +148,26 @@ class Weapon extends Item {
 }
 
 class Book extends Item {
-    private Spell spell;
+    private Spell spell; // the spell that the book unlocks
 
+    /**
+     * Creates a book that can be used to unlock a new spell.
+     * 
+     * @param name
+     * @param description
+     * @param spell
+     */
     public Book(String name, String description, Spell spell) {
         super(name, description, 1);
         itemtype = "book";
         this.spell = spell;
     }
 
+    /**
+     * Used to add a new spell to the player.
+     * 
+     * @param player
+     */
     public void use(Player player) {
         player.addSpell(spell);
         System.out.println("You learned a new spell: " + spell.getName());
@@ -149,6 +175,7 @@ class Book extends Item {
 }
 
 class Gamemap extends Item {
+    // initialises the original map
     private String map = "" +
             "         N                      ########################################\r\n" +
             "       W   E                    #                                      #\r\n" +
@@ -192,9 +219,17 @@ class Gamemap extends Item {
             "                ################## #                  # ##################\r\n" +
             "                                   #                  # \r\n" +
             "                                   ####################\r\n";
-    private String blurMap = map;
+    private String blurMap = map; // A version of the map with names blurred
+    // a hashmap between room names and whether the player has visited the room
     private HashMap<String, Boolean> visitedFacts = new HashMap<String, Boolean>();
 
+    /**
+     * Creates a new map and initialises the values in visitedFacts.
+     * Updates the pointer to be at the spawn.
+     * 
+     * @param name
+     * @param description
+     */
     public Gamemap(String name, String description) {
         super(name, description, 0);
         itemtype = "map";
@@ -211,10 +246,20 @@ class Gamemap extends Item {
         updatePointer("Spawn");
     }
 
+    /**
+     * Prints the current state of the map.
+     */
     public void use() {
         System.out.println("You pull out your map.\n" + blurMap);
     }
 
+    /**
+     * Updates the position of the arrow that points to the room that the player is
+     * currently in.
+     * Used whenever the player moves to a different room.
+     * 
+     * @param roomname
+     */
     public void updatePointer(String roomname) {
         visitedFacts.put(roomname, true);
         Scanner words = new Scanner(roomname);
@@ -226,6 +271,10 @@ class Gamemap extends Item {
         updateBlurred();
     }
 
+    /**
+     * Checks all the rooms for whether the player has ever been there.
+     * Blurs the name of the room on the map if they have not.
+     */
     public void updateBlurred() {
         blurMap = map;
         String word;
@@ -243,6 +292,11 @@ class Gamemap extends Item {
         }
     }
 
+    /**
+     * Removes the symbols used to indicate locked doors.
+     * 
+     * @param roomname
+     */
     public void unlock(String roomname) {
         map = map.replace((roomname == "Black Hall") ? "--" : "==", "  ");
         updateBlurred();
@@ -250,30 +304,59 @@ class Gamemap extends Item {
 }
 
 class HealthPotion extends Item {
-    private int count;
+    private int count; // number of potions in the 'stack'
 
+    /**
+     * Creates a new 'stack' of health potions
+     * 
+     * @param count
+     */
     public HealthPotion(int count) {
         super("healthPotion", "Restores half of your health.", 1);
         itemtype = "healthPotion";
         this.count = count;
     }
 
+    /**
+     * Adds a potion to the stack
+     * 
+     * @param count
+     */
     public void add(int count) {
         this.count += count;
     }
 
+    /**
+     * Removes a potion from the stack
+     * 
+     * @param count
+     */
     public void remove(int count) {
         this.count -= count;
     }
 
+    /**
+     * @return weight of individual potion is 1, so total weight = count of potions
+     */
     public int getWeight() {
         return count;
     }
 
+    /**
+     * @return a specialised description that can show total weight
+     */
     public String getDescription() {
-        return description + " Total weight: " + weight * count;
+        return description + " Total weight: " + count;
     }
 
+    /**
+     * Heals the player by half the amount of their current max health.
+     * Does not overheal the player if their current health is higher than half of
+     * max health.
+     * 
+     * @param player
+     * @return remaining number of health potions
+     */
     public int use(Player player) {
         int potency = (int) Math.ceil((double) player.getMaxHealth() / 2);
         System.out.println(potency);
@@ -287,9 +370,17 @@ class HealthPotion extends Item {
 }
 
 class UpgradeItem extends Item {
-    private Item originalItem;
-    private Item replacementItem;
+    private Item originalItem; // item to be upgraded
+    private Item replacementItem; // what the item is upgraded to
 
+    /**
+     * Creates a new UpgradeItem that is required to upgrade a certain item.
+     * 
+     * @param name
+     * @param description
+     * @param originalItem
+     * @param replacementItem
+     */
     public UpgradeItem(String name, String description, Item originalItem, Item replacementItem) {
         super(name, description, 1);
         this.originalItem = originalItem;
@@ -297,22 +388,40 @@ class UpgradeItem extends Item {
         itemtype = "upgradeItem";
     }
 
+    /**
+     * @param itemName
+     * @return true if the input name matches the name of the original item, false
+     *         otherwise
+     */
     public boolean isOriginalItem(String itemName) {
         return originalItem.getName().equals(itemName);
     }
 
+    /**
+     * @return the original item
+     */
     public Item getOriginalItem() {
         return originalItem;
     }
 
+    /**
+     * @return the replacement item
+     */
     public Item getReplacementItem() {
         return replacementItem;
     }
 }
 
 class UpgradePoint extends Item {
-    private String upgradeType;
+    private String upgradeType; // type of item that it can upgrade
 
+    /**
+     * Creates a new UpgradePoint that can be used to upgrade items
+     * 
+     * @param name
+     * @param description
+     * @param upgradeType
+     */
     public UpgradePoint(String name, String description, String upgradeType) {
         super(name, description, 100);
         itemtype = "upgradePoint";
@@ -320,6 +429,14 @@ class UpgradePoint extends Item {
         movable = false;
     }
 
+    /**
+     * Checks whether the required item to upgrade the specified item is in the
+     * player's inventory
+     * If it's there, upgrade the item, otherwise print error message
+     * 
+     * @param command
+     * @param player
+     */
     public void use(Command command, Player player) {
         if (!command.hasThirdWord()) {
             System.out.println("What are you doing with this.");
@@ -350,6 +467,9 @@ class UpgradePoint extends Item {
 }
 
 class Backpack extends Item {
+    /**
+     * Creates a backpack that is used to increase the player storage capacity.
+     */
     public Backpack() {
         super("backpack", "Increases storage", 0);
         itemtype = "backpack";
