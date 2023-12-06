@@ -351,20 +351,13 @@ class HealthPotion extends Item {
 
     /**
      * Heals the player by half the amount of their current max health.
-     * Does not overheal the player if their current health is higher than half of
-     * max health.
      * 
      * @param player
      * @return remaining number of health potions
      */
     public int use(Player player) {
-        int potency = (int) Math.ceil((double) player.getMaxHealth() / 2);
-        System.out.println(potency);
-        int health = Math.min(potency, player.getMaxHealth() - player.getHealth());
-        player.heal(health);
+        player.heal();
         count -= 1;
-        System.out.println(String.format("You recovered %d hp, current hp: %d/%d", health, player.getHealth(),
-                player.getMaxHealth()));
         return count;
     }
 }
@@ -452,7 +445,7 @@ class UpgradePoint extends Item {
                     return;
                 }
                 Item originalItem = ((UpgradeItem) item).getOriginalItem();
-                player.pickup(newItem);
+                player.addItem(newItem);
                 System.out.println(String.format("You upgraded %s into %s.", originalItemName, newItem.getName()));
                 if (newItem.getItemtype() == "weapon" && player.isEquipped((Weapon) originalItem)) {
                     player.equip((Weapon) newItem);
