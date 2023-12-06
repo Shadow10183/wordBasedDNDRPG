@@ -27,12 +27,6 @@ public class Game {
     // maps command strings to respective methods
     private HashMap<String, Function<Command, Boolean>> commandList = new HashMap<>();
 
-    // main function for personal testing
-    public static void main(String[] args) {
-        Game mygame = new Game();
-        mygame.play();
-    }
-
     /**
      * Create the game and initialise its internal map.
      */
@@ -48,7 +42,7 @@ public class Game {
      * Set the enemy drops.
      */
     private void createEntities() {
-        // initialize the player
+        // initialise the player
         player = new Player();
 
         // create the rooms and the teleporter
@@ -162,7 +156,7 @@ public class Game {
         westPier.addItem(healthPotionx3);
         armoury.addItem(anvil);
         library.addItem(lightningBook);
-        player.pickup(map);
+        player.addItem(map);
 
         // add enemy drops
         mimic.addDrop(backpack, 1);
@@ -283,8 +277,8 @@ public class Game {
     }
 
     /**
-     * Try to in to one direction. If there is an exit, enter the new room.
-     * If sucessfully entered a new room, enemies will also move.
+     * Tells the player to go to a new room. If sucessfully entered a new room,
+     * enemies will also move.
      * 
      * @param command The command to be processed.
      * @return false as this will not lead to quitting or death of player.
