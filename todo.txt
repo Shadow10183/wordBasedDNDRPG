@@ -1,6 +1,1 @@
-add comments to: (get header comment from Parser)
-    Item (after key)
-    Player
-    Room
-
-remove main from Game
+all done
