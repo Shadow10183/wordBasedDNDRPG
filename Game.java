@@ -27,6 +27,11 @@ public class Game {
     // maps command strings to respective methods
     private HashMap<String, Function<Command, Boolean>> commandList = new HashMap<>();
 
+    public static void main(String[] args) {
+        Game myGame = new Game();
+        myGame.play();
+    }
+
     /**
      * Create the game and initialise its internal map.
      */
