@@ -63,7 +63,7 @@ public class Player {
         }
         if (detected) {
             // if there are enemies in the same room, the player cannot go past them.
-            System.err.println("You cannot do that until all enemies have been defeated.");
+            System.out.println("You cannot do that until all enemies have been defeated.");
             System.out.println("If you are not ready, go back.");
             return false;
         }
@@ -147,7 +147,7 @@ public class Player {
         if (detected) {
             // if there are enemies in the same room, the player can't search the room
             // either.
-            System.err.println("You cannot do that until all enemies have been defeated.");
+            System.out.println("You cannot do that until all enemies have been defeated.");
             System.out.println("If you are not ready, go back.");
             return false;
         }
@@ -170,7 +170,7 @@ public class Player {
         }
         if (detected) {
             // if there are enemies in the same room, the player can't pick up items either.
-            System.err.println("You cannot do that until all enemies have been defeated.");
+            System.out.println("You cannot do that until all enemies have been defeated.");
             System.out.println("If you are not ready, go back.");
             return false;
         }
@@ -262,7 +262,7 @@ public class Player {
         }
         if (detected) {
             // if there are enemies in the same room, the player can't drop items either.
-            System.err.println("You cannot do that until all enemies have been defeated.");
+            System.out.println("You cannot do that until all enemies have been defeated.");
             System.out.println("If you are not ready, go back.");
             return false;
         }
